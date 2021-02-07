@@ -1,0 +1,15 @@
+{
+  "name": "pr-auto-updater",
+  "version": "0.1.0",
+  "description": "Automatically update PR branch",
+  "main": "dest/index.js",
+  "repository": "git@github.com:adRise/pr-auto-updater.git",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {},
+  "devDependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0",
+    "@vercel/ncc": "^0.27.0"
+  }
+}
