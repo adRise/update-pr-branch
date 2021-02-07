@@ -1,7 +1,7 @@
 # PR Auto Updator Action
 
 This Github action is designed to work with the Github `auto-merge` feature.  
-The action will try to update the branch of the newest open PR that matches the below conditons
+The action will try to update the branch of the newest open PR that matches the below conditions
 - The PR has the auto-merge option enabled
 - The PR has 2 approvals and no changes-requested review
 - The PR has all checks passed
@@ -18,6 +18,7 @@ You can use the `GITHUB_TOKEN` or [personal access token](https://github.com/set
 ### `base`
 
 **Required**
+Default: 'master'
 
 The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.  Default `"master"`
 
@@ -26,8 +27,9 @@ The action will only check PRs that use the `base` as the base branch.
 ### `required_approval_count`
 
 **Required**
+Default: 2
 
-The action will skip PRs that have less approvals than `required_approval_count`
+The action will skip PRs that have less approvals than `required_approval_count`. 
 
 ## Example usage
 
