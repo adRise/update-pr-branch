@@ -12,7 +12,6 @@ __nccwpck_require__.r(__webpack_exports__);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(186);
 // CONCATENATED MODULE: ./lib/github.js
-
 const github_core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 
@@ -78,7 +77,7 @@ const getMergeableStatus = async (pullNumber) => {
   };
 
   // for unknown, the first `get` request above will trigger a background job to create a test merge commit
-  if ( mergeableStatus.mergeable_state === 'unknown') {
+  if (mergeableStatus.mergeable_state === 'unknown') {
     // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
     // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
     await sleep(3000);
@@ -190,6 +189,7 @@ const getApprovalStatus = async (pullNumber) => {
     requiredApprovalCount,
   };
 }
+
 // CONCATENATED MODULE: ./index.js
 
 
