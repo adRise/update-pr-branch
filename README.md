@@ -1,4 +1,4 @@
-# PR Auto Updator Action
+# PR Auto Updater Action
 
 This Github action is designed to work with the Github `auto-merge` feature.
 The action will try to update the branch of the newest open PR that matches the below conditions
@@ -23,7 +23,7 @@ Need to note, you can't use `GITHUB_TOKEN` because of [this limitation](https://
 
 Default: 'master'
 
-The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.  Default `"master"`
+The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.
 
 The action will only check PRs that use the `base` as the base branch.
 
@@ -52,13 +52,14 @@ jobs:
         with:
           ref: 'master'
       - name: Automatically update PR
-        uses: actions/pr_updater@latest
+        uses: actions/pr_updater@VERSION_YOU_WANT_TO_USE
         with:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
           required_approval_count: 2
 ```
 
+Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
 
 ## Development
 
