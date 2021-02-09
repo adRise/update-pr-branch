@@ -198,11 +198,13 @@ async function main() {
   try {
     const openPRs = await getOpenPRs();
 
-    const { number: pullNumber } = await getAutoUpdateCandidate(openPRs);
+    const pr = await getAutoUpdateCandidate(openPRs);
     if (!pr) {
       log('No applicable PR to update.');
       return;
     }
+
+    const { number: pullNumber } = pr;
 
     // update the pr
     log(`Trying to update PR branch #${pullNumber}`);
