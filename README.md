@@ -1,6 +1,6 @@
 # PR Auto Updator Action
 
-This Github action is designed to work with the Github `auto-merge` feature.  
+This Github action is designed to work with the Github `auto-merge` feature.
 The action will try to update the branch of the newest open PR that matches the below conditions
 - The PR has the auto-merge option enabled
 - The PR has 2 approvals and no changes-requested review
@@ -12,24 +12,28 @@ The action will try to update the branch of the newest open PR that matches the 
 
 ### `token`
 
-**Required** 
-You can use the `GITHUB_TOKEN` or [personal access token](https://github.com/settings/tokens/).
+**Required**
 
+ The [personal access token](https://github.com/settings/tokens/).
+
+Need to note, you can't use `GITHUB_TOKEN` because of [this limitation](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token)
 ### `base`
 
 **Required**
+
 Default: 'master'
 
 The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.  Default `"master"`
 
-The action will only check PRs that use the `base` as the base branch. 
+The action will only check PRs that use the `base` as the base branch.
 
 ### `required_approval_count`
 
 **Required**
+
 Default: 2
 
-The action will skip PRs that have less approvals than `required_approval_count`. 
+The action will skip PRs that have less approvals than `required_approval_count`.
 
 ## Example usage
 
@@ -48,9 +52,9 @@ jobs:
         with:
           ref: 'master'
       - name: Automatically update PR
-        uses: actions/pr_updater
+        uses: actions/pr_updater@latest
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
           required_approval_count: 2
 ```
@@ -60,7 +64,7 @@ jobs:
 
 ```bash
 yarn
-# this compile index.js to dest/init.js for running 
+# this compile index.js to dest/init.js for running
 make
 ```
 
