@@ -1,0 +1,70 @@
+{
+  "status": 200,
+  "url": "https://api.github.com/repos/adRise/www/pulls/5892/reviews",
+  "headers": {
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation, Sunset"
+  },
+  "data": [
+    {
+      "id": 580059684,
+      "node_id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTgwMDU5Njg0",
+      "user": {
+        "login": "yu",
+        "id": 4938253
+      },
+      "body": "",
+      "state": "COMMENTED",
+      "html_url": "https://github.com/adRise/www/pull/5892#pullrequestreview-580059684",
+      "pull_request_url": "https://api.github.com/repos/adRise/www/pulls/5892",
+      "author_association": "COLLABORATOR",
+      "submitted_at": "2021-02-01T07:07:20Z",
+      "commit_id": "df2be46782014f03e081c53822ee9e2cde6546b3"
+    },
+    {
+      "id": 580161703,
+      "node_id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTgwMTYxNzAz",
+      "user": {
+        "login": "sp",
+        "id": 687452
+      },
+      "body": "LGTM.",
+      "state": "APPROVED",
+      "html_url": "https://github.com/adRise/www/pull/5892#pullrequestreview-580161703",
+      "pull_request_url": "https://api.github.com/repos/adRise/www/pulls/5892",
+      "author_association": "CONTRIBUTOR",
+      "submitted_at": "2021-02-01T09:34:02Z",
+      "commit_id": "df2be46782014f03e081c53822ee9e2cde6546b3"
+    },
+    {
+      "id": 585109404,
+      "node_id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg1MTA5NDA0",
+      "user": {
+        "login": "gre",
+        "id": 75557
+      },
+      "body": "blablabla",
+      "state": "CHANGES_REQUESTED",
+      "html_url": "https://github.com/adRise/www/pull/5892#pullrequestreview-585109404",
+      "pull_request_url": "https://api.github.com/repos/adRise/www/pulls/5892",
+      "author_association": "CONTRIBUTOR",
+      "submitted_at": "2021-02-08T02:15:00Z",
+      "commit_id": "47366108ae6f27d4f63ded4df8057fa2c600d646"
+    },
+    {
+      "id": 585182717,
+      "node_id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg1MTgyNzE3",
+      "user": {
+        "login": "yu",
+        "id": 4938543
+      },
+      "body": "",
+      "state": "COMMENTED",
+      "html_url": "https://github.com/adRise/www/pull/5892#pullrequestreview-585182717",
+      "pull_request_url": "https://api.github.com/repos/adRise/www/pulls/5892",
+      "author_association": "COLLABORATOR",
+      "submitted_at": "2021-02-08T06:08:47Z",
+      "commit_id": "47366108ae6f27d4f63ded4df8057fa2c600d646"
+    }
+  ]
+}
