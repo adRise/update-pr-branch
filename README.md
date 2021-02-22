@@ -1,6 +1,6 @@
 # PR Auto Updater Action
 
-This Github action is designed to work with the Github `auto-merge` feature.
+This GitHub action is designed to work with the GitHub `auto-merge` feature.
 The action will try to update the branch of the newest open PR that matches the below conditions
 
 - The PR has the auto-merge option enabled
@@ -37,7 +37,7 @@ Default: 2
 
 The action will skip PRs that have less approvals than `required_approval_count`.
 
-We could retrieve this value from the repo settings through an API call but that will incure one more request. Github has [rate limit](https://docs.github.com/en/actions/reference/usage-limits-billing-and-administration#usage-limits) on API usage of Github actions.
+We could retrieve this value from the repo settings through an API call but that will incur one more request. GitHub has [rate limit](https://docs.github.com/en/actions/reference/usage-limits-billing-and-administration#usage-limits) on API usage of GitHub actions.
 
 > API requests - You can execute up to 1000 API requests in an hour across all actions within a repository. If exceeded, additional API calls will fail, which might cause jobs to fail.
 
