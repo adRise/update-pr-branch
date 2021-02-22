@@ -58,7 +58,7 @@ jobs:
         with:
           ref: 'master'
       - name: Automatically update PR
-        uses: actions/pr_updater@VERSION_YOU_WANT_TO_USE
+        uses: adRise/pr-auto-updater@VERSION_YOU_WANT_TO_USE
         with:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
