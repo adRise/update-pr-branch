@@ -1,5 +1,5 @@
 name: 'Update PR Branch'
-description: 'Automatically update the PR branch with the base branch. The action helps click "Update Branch" button for your ready-to-merge PR. Designed to work with auto-merge option of GitHub.'
+description: 'Automatically update the branch of newest ready to merge PR. Designed to work with the auto-merge option.'
 branding:
   icon: git-pull-request
   color: orange

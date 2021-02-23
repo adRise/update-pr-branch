@@ -1,5 +1,5 @@
 {
-  "name": "pr-auto-updater",
+  "name": "update-pr-branch",
   "version": "0.1.0",
   "description": "Automatically update PR branch",
   "main": "dest/index.js",
@@ -8,7 +8,7 @@
     "jest-dev": "jest src --coverage --verbose --watch",
     "build": "ncc build src/index.js -o dest"
   },
-  "repository": "git@github.com:adRise/pr-auto-updater.git",
+  "repository": "git@github.com:adRise/update-pr-branch.git",
   "license": "MIT",
   "private": false,
   "dependencies": {},

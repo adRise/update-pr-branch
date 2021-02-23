@@ -1,17 +1,28 @@
 # Update PR Branch Action
 
-![GitHub Actions](https://github.com/adRise/pr-auto-updater/actions/workflows/unit_test.yml/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/adRise/pr-auto-updater/badge.svg?branch=master)](https://coveralls.io/github/adRise/pr-auto-updater)
+![GitHub Actions](https://github.com/adRise/update-pr-branch/actions/workflows/unit_test.yml/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/adRise/update-pr-branch/badge.svg?branch=master)](https://coveralls.io/github/adRise/update-pr-branch)
 
 > Automatically update the PR branch
 
-The action helps "click" "Update Branch" button for your ready-to-merge PRs. Designed to work with the GitHub `auto-merge` option. It will update the newest open PR that match the below conditions
+The job of the action is to help click "Update branch" button for you. Designed to work with the `auto-merge` and ["Require branches to be up to date before merging"](https://docs.github.com/en/github/administering-a-repository/about-protected-branches#require-status-checks-before-merging) options. It will update the newest open PR that match the below conditions
 
 - The PR has the `auto-merge` option enabled
 - The PR has 2 approvals and no changes-requested review
 - The PR has all checks passed
 - The PR branch has no conflicts with the base branch
 - The PR branch is behind the base branch
+
+## When do you need this action
+
+You may consider to use this action if you:
+
+- Have enabled the `auto-merge` [feature](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request) in your repo.
+- Have checked the "Require branches to be up to date before merging" checkbox for protected branches. See more [Require status checks before merging](https://docs.github.com/en/github/administering-a-repository/about-protected-branches#require-status-checks-before-merging)
+
+Because of #2, even you have enabled `auto-merge` for a PR, the PR won't be automatically merged if the PR branch is behind the base branch, for example someone else merges another PR before your PR passes all CI checks. See the screenshot as below.
+
+![Update branch](screenshot.png)
 
 ## Inputs
 
@@ -62,7 +73,7 @@ jobs:
         with:
           ref: 'master'
       - name: Automatically update PR
-        uses: adRise/pr-auto-updater@VERSION_YOU_WANT_TO_USE
+        uses: adRise/update-pr-branch@VERSION_YOU_WANT_TO_USE
         with:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
