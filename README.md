@@ -1,5 +1,8 @@
 # PR Auto Updater Action
 
+![GitHub Actions](https://github.com/adRise/pr-auto-updater/actions/workflows/unit_test.yml/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/adRise/pr-auto-updater/badge.svg?branch=master)](https://coveralls.io/github/adRise/pr-auto-updater)
+
 This GitHub action is designed to work with the GitHub `auto-merge` feature.
 The action will try to update the branch of the newest open PR that matches the below conditions
 
