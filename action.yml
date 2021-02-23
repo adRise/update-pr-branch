@@ -1,19 +1,19 @@
-name: 'PR Auto Update'
-description: 'Auto update PR branch after the upstream branch is updated'
+name: 'Update PR Branch'
+description: 'Automatically update the PR branch with the base branch. The action helps click "Update Branch" button for your ready-to-merge PR. Designed to work with auto-merge option of GitHub.'
 branding:
   icon: git-pull-request
   color: orange
 inputs:
   token:
-    description: 'The GITHUB_TOKEN secret'
+    description: 'The GitHub personal access token'
     required: true
   base:
     required: true
-    description: 'The base branch this action will use to get PRs'
+    description: 'The base branch that this action will use to get PRs'
     default: 'master'
   required_approval_count:
     required: true
-    description: 'The action will skip PRs that have less approval than this value'
+    description: 'The action will skip PRs that have less approvals than this value'
     default: '2'
 runs:
   using: 'node12'

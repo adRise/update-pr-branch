@@ -1,12 +1,13 @@
-# PR Auto Updater Action
+# Update PR Branch Action
 
 ![GitHub Actions](https://github.com/adRise/pr-auto-updater/actions/workflows/unit_test.yml/badge.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/adRise/pr-auto-updater/badge.svg?branch=master)](https://coveralls.io/github/adRise/pr-auto-updater)
 
-This GitHub action is designed to work with the GitHub `auto-merge` feature.
-The action will try to update the branch of the newest open PR that matches the below conditions
+> Automatically update the PR branch
 
-- The PR has the auto-merge option enabled
+The action helps "click" "Update Branch" button for your ready-to-merge PRs. Designed to work with the GitHub `auto-merge` option. It will update the newest open PR that match the below conditions
+
+- The PR has the `auto-merge` option enabled
 - The PR has 2 approvals and no changes-requested review
 - The PR has all checks passed
 - The PR branch has no conflicts with the base branch
@@ -28,7 +29,7 @@ Need to note, you can't use `GITHUB_TOKEN` because of [this limitation](https://
 
 Default: `master`
 
-The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.
+The base branch that the PR will use to fetch open PRs, for example, `main`, `master` or `dev`.
 
 The action will only check PRs that use the `base` as the base branch.
 
