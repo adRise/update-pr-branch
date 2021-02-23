@@ -5836,15 +5836,6 @@ function wrappy (fn, cb) {
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// NAMESPACE OBJECT: ./src/lib/github.js
-var github_namespaceObject = {};
-__nccwpck_require__.r(github_namespaceObject);
-__nccwpck_require__.d(github_namespaceObject, {
-  "JC": () => getAutoUpdateCandidate,
-  "XC": () => getOpenPRs,
-  "q7": () => updatePRBranch
-});
-
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(186);
 // CONCATENATED MODULE: ./src/lib/github.js
@@ -6047,7 +6038,10 @@ const getAutoUpdateCandidate = async (openPRs) => {
   return null;
 };
 
+// EXTERNAL MODULE: ./src/lib/util.js
+var util = __nccwpck_require__(103);
 // CONCATENATED MODULE: ./src/index.js
+
 
 
 
@@ -6057,19 +6051,19 @@ async function main() {
 
     const pr = await getAutoUpdateCandidate(openPRs);
     if (!pr) {
-      (0,github_namespaceObject.log)('No applicable PR to update.');
+      (0,util.log)('No applicable PR to update.');
       return;
     }
 
     const { number: pullNumber } = pr;
 
     // update the pr
-    (0,github_namespaceObject.log)(`Trying to update the branch of PR #${pullNumber}`);
+    (0,util.log)(`Trying to update the branch of PR #${pullNumber}`);
 
     // TODO (zhiye): try next the PR in the queue if update fails
     try {
       await updatePRBranch(pullNumber);
-      (0,github_namespaceObject.log)('Successfully updated. Cheers 🎉!');
+      (0,util.log)('Successfully updated. Cheers 🎉!');
     } catch (err) {
       core.setFailed(`Fail to update PR with error: ${err}`);
     }

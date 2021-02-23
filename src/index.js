@@ -2,9 +2,9 @@ import * as core from '@actions/core';
 import {
   getOpenPRs,
   getAutoUpdateCandidate,
-  log,
   updatePRBranch,
 } from './lib/github';
+import { log } from './lib/util';
 
 async function main() {
   try {
