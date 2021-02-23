@@ -1,5 +1,10 @@
 import * as core from '@actions/core';
-import { getOpenPRs, getAutoUpdateCandidate, log, updatePRBranch } from './lib/github';
+import {
+  getOpenPRs,
+  getAutoUpdateCandidate,
+  updatePRBranch,
+} from './lib/github';
+import { log } from './lib/util';
 
 async function main() {
   try {
@@ -14,12 +19,12 @@ async function main() {
     const { number: pullNumber } = pr;
 
     // update the pr
-    log(`Trying to update PR branch #${pullNumber}`);
+    log(`Trying to update the branch of PR #${pullNumber}`);
 
     // TODO (zhiye): try next the PR in the queue if update fails
     try {
       await updatePRBranch(pullNumber);
-      log('Successful updated. Cheers 🎉!')
+      log('Successfully updated. Cheers 🎉!');
     } catch (err) {
       core.setFailed(`Fail to update PR with error: ${err}`);
     }

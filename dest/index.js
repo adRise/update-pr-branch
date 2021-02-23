@@ -2,230 +2,6 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 746:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(186);
-// CONCATENATED MODULE: ./lib/github.js
-const github_core = __nccwpck_require__(186);
-const github = __nccwpck_require__(438);
-
-const token = github_core.getInput('token');
-const baseBranch = github_core.getInput('base');
-const requiredApprovalCount = github_core.getInput('required_approval_count');
-
-const octokit = github.getOctokit(token);
-const repo = github.context.repo;
-
-const log = console.log.bind(null, 'LOG >');
-const outputFailReason = (pullNumber, reason) => log(`Won't update #${pullNumber}, the reason:\n      > ${reason}`);
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-const getOpenPRs = async () => {
-  const { data } = await octokit.pulls.list({
-    ...repo,
-    base: baseBranch,
-    state: 'open',
-  });
-
-  return data;
-}
-// use the github api to update a branch
-const updatePRBranch = async (pullNumber) => {
-  const { data } = await octokit.pulls.updateBranch({
-    ...repo,
-    pull_number: pullNumber,
-  });
-
-  return data;
-};
-
-/**
- * get PR metaData
- */
-const getPR = async (pullNumber) => {
-  const { data } = await octokit.pulls.get({
-    ...repo,
-    pull_number: pullNumber,
-  });
-
-  return data;
-}
-
-/**
- * get PR mergeable status
- * @param {string} pullNumber
- */
-const getMergeableStatus = async (pullNumber) => {
-  /**
-   * mergeable_state values
-   * - behind: The head ref is out of date. // we need to merge base branch into this branch
-   * - dirty: The merge commit cannot be cleanly created. // usually means there are conflicts
-   * - unknown: The state cannot currently be determined. // need to create a test commit to get the real mergeable_state
-   * - and more https://docs.github.com/en/graphql/reference/enums#mergestatestatus
-   */
-  let data = await getPR(pullNumber);
-  let mergeableStatus = {
-    mergeable: data.mergeable,
-    mergeable_state: data.mergeable_state,
-  };
-
-  // for unknown, the first `get` request above will trigger a background job to create a test merge commit
-  if (mergeableStatus.mergeable_state === 'unknown') {
-    // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
-    // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
-    await sleep(3000);
-    data = await getPR(pullNumber);
-    mergeableStatus = {
-      mergeable: data.mergeable,
-      mergeable_state: data.mergeable_state,
-    }
-  }
-
-  return mergeableStatus;
-}
-
-/**
- * find a applicable PR to update
- */
-const getAutoUpdateCandidate = async (PRs) => {
-
-  // only update `auto merge` enabled PRs
-  const autoMergeEnabledPRs = PRs.filter(item => item.auto_merge);
-  log('Amount of auto merge enabled PRs:', autoMergeEnabledPRs.length);
-
-  for (const pr of autoMergeEnabledPRs) {
-    const { number: pullNumber, head: { sha } } = pr;
-
-    log(`Checking applicable status of #${pullNumber}`);
-
-    // #1 check whether the pr has enough approvals
-    const { changesRequestedCount, approvalCount, requiredApprovalCount } = await getApprovalStatus(pullNumber);
-    if (changesRequestedCount || approvalCount < requiredApprovalCount) {
-      const reason = `approvalsCount: ${approvalCount}, requiredApprovalCount: ${requiredApprovalCount}, changesRequestedReviews: ${changesRequestedCount}`;
-      outputFailReason(pullNumber, reason);
-      continue;
-    };
-
-    /**
-     * #2 check whether the PR needs update
-     * - the pr is mergeable: no conflicts
-     * - the pr is behind the base branch
-     */
-    const { mergeable, mergeable_state } = await getMergeableStatus(pullNumber);
-
-    if (!mergeable || mergeable_state !== 'behind') {
-      let failReason;
-      if (!mergeable) {
-        failReason = `The 'mergeable' value is: ${mergeable}`;
-      }
-      if (mergeable_state !== 'behind') {
-        failReason = `The 'mergeable_state' value is: "${mergeable_state}". The branch is not "behind" the base branch`;
-      }
-
-      outputFailReason(pullNumber, failReason);
-      continue;
-    };
-
-    /**
-     * #3 check whether the pr has failed checks
-     * need to note: the mergeable, and mergeable_state don't reflect the checks status
-     */
-    const didChecksPass =  await areAllChecksPassed(sha);
-    if (!didChecksPass) {
-      outputFailReason(pullNumber, 'The PR has failed or ongoing check(s)');
-      continue;
-    };
-
-    return pr;
-  }
-
-  return null;
-};
-
-/**
- * whether all checks passed
- */
-const areAllChecksPassed = async (sha) => {
-  const { data: { check_runs } } = await octokit.checks.listForRef({
-    ...repo,
-    ref: sha,
-  })
-
-  const hasUnfinishedOrFailedChecks =  check_runs.some(item => {
-    return item.status !== 'completed' || item.conclusion === 'failure';
-  });
-
-  return !hasUnfinishedOrFailedChecks;
-}
-
-/**
- * check whether PR is mergeable from the Approval perspective
- * the pr needs to have minimum required approvals && no request-for-changes reviews
- */
-const getApprovalStatus = async (pullNumber) => {
-  const { data: reviewsData} = await octokit.pulls.listReviews({
-    ...repo,
-    pull_number: pullNumber,
-  });
-
-  let changesRequestedCount = 0;
-  let approvalCount = 0;
-
-  reviewsData.forEach(({ state }) => {
-    if (state === 'CHANGES_REQUESTED') changesRequestedCount += 1;
-    if (state === 'APPROVED') approvalCount += 1;
-  });
-
-  return {
-    changesRequestedCount,
-    approvalCount,
-    requiredApprovalCount,
-  };
-}
-
-// CONCATENATED MODULE: ./index.js
-
-
-
-async function main() {
-  try {
-    const openPRs = await getOpenPRs();
-
-    const pr = await getAutoUpdateCandidate(openPRs);
-    if (!pr) {
-      log('No applicable PR to update.');
-      return;
-    }
-
-    const { number: pullNumber } = pr;
-
-    // update the pr
-    log(`Trying to update PR branch #${pullNumber}`);
-
-    // TODO (zhiye): try next the PR in the queue if update fails
-    try {
-      await updatePRBranch(pullNumber);
-      log('Successful updated. Cheers 🎉!')
-    } catch (err) {
-      core.setFailed(`Fail to update PR with error: ${err}`);
-    }
-  } catch (err) {
-    core.setFailed(`Action failed with error ${err}`);
-  }
-}
-
-main();
-
-
-/***/ }),
-
 /***/ 351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1685,7 +1461,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(287);
+var isPlainObject = __nccwpck_require__(558);
 var universalUserAgent = __nccwpck_require__(429);
 
 function lowercaseKeys(object) {
@@ -2071,6 +1847,52 @@ const endpoint = withDefaults(null, DEFAULTS);
 
 exports.endpoint = endpoint;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 558:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3560,7 +3382,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __nccwpck_require__(440);
 var universalUserAgent = __nccwpck_require__(429);
-var isPlainObject = __nccwpck_require__(287);
+var isPlainObject = __nccwpck_require__(62);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
@@ -3700,6 +3522,52 @@ const request = withDefaults(endpoint.endpoint, {
 
 exports.request = request;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 62:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3905,52 +3773,6 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 287:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -6007,6 +5829,272 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 478:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// CONCATENATED MODULE: ./src/lib/github.js
+const github_core = __nccwpck_require__(186);
+const github = __nccwpck_require__(438);
+const { log, printFailReason, wait } = __nccwpck_require__(103);
+
+const getOctokit = () => {
+  const token = github_core.getInput('token');
+  return github.getOctokit(token);
+};
+
+const getOpenPRs = async () => {
+  const octokit = getOctokit();
+  const repo = github.context.repo;
+  const baseBranch = github_core.getInput('base');
+
+  const { data } = await octokit.pulls.list({
+    ...repo,
+    base: baseBranch,
+    state: 'open',
+  });
+
+  return data;
+};
+
+// use the github api to update a branch
+const updatePRBranch = async (pullNumber) => {
+  const octokit = getOctokit();
+  const repo = github.context.repo;
+  const { data } = await octokit.pulls.updateBranch({
+    ...repo,
+    pull_number: pullNumber,
+  });
+
+  return data;
+};
+
+/**
+ * get PR metaData
+ */
+const getPR = async (pullNumber) => {
+  const octokit = getOctokit();
+  const repo = github.context.repo;
+  const result = await octokit.pulls.get({
+    ...repo,
+    pull_number: pullNumber,
+  });
+
+  return result.data;
+};
+
+/**
+ * get PR mergeable status
+ * @param {string} pullNumber
+ */
+const getMergeableStatus = async (pullNumber) => {
+  /**
+   * mergeable_state values
+   * - behind: The head ref is out of date. // we need to merge base branch into this branch
+   * - dirty: The merge commit cannot be cleanly created. // usually means there are conflicts
+   * - unknown: The state cannot currently be determined. // need to create a test commit to get the real mergeable_state
+   * - and more https://docs.github.com/en/graphql/reference/enums#mergestatestatus
+   */
+  let data = await getPR(pullNumber);
+  let mergeableStatus = {
+    mergeable: data.mergeable,
+    mergeable_state: data.mergeable_state,
+  };
+
+  // for unknown, the first `get` request above will trigger a background job to create a test merge commit
+  if (mergeableStatus.mergeable_state === 'unknown') {
+    // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
+    // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
+    console.info(mergeableStatus, wait);
+    await wait(3000);
+    data = await getPR(pullNumber);
+    mergeableStatus = {
+      mergeable: data.mergeable,
+      mergeable_state: data.mergeable_state,
+    };
+  }
+
+  return mergeableStatus;
+};
+
+/**
+ * whether all checks passed
+ */
+const areAllChecksPassed = async (sha) => {
+  const octokit = getOctokit();
+  const repo = github.context.repo;
+  const {
+    data: { check_runs },
+  } = await octokit.checks.listForRef({
+    ...repo,
+    ref: sha,
+  });
+
+  const hasUnfinishedOrFailedChecks = check_runs.some((item) => {
+    return item.status !== 'completed' || item.conclusion === 'failure';
+  });
+
+  return !hasUnfinishedOrFailedChecks;
+};
+
+/**
+ * check whether PR is mergeable from the Approval perspective
+ * the pr needs to have minimum required approvals && no request-for-changes reviews
+ */
+const getApprovalStatus = async (pullNumber) => {
+  const octokit = getOctokit();
+  const repo = github.context.repo;
+  const requiredApprovalCount = github_core.getInput('required_approval_count');
+
+  const { data: reviewsData } = await octokit.pulls.listReviews({
+    ...repo,
+    pull_number: pullNumber,
+  });
+
+  let changesRequestedCount = 0;
+  let approvalCount = 0;
+
+  reviewsData.forEach(({ state }) => {
+    if (state === 'CHANGES_REQUESTED') changesRequestedCount += 1;
+    if (state === 'APPROVED') approvalCount += 1;
+  });
+
+  return {
+    changesRequestedCount,
+    approvalCount,
+    requiredApprovalCount,
+  };
+};
+
+/**
+ * find a applicable PR to update
+ */
+const getAutoUpdateCandidate = async (openPRs) => {
+  if (!openPRs) return null;
+
+  const requiredApprovalCount = github_core.getInput('required_approval_count');
+  // only update `auto merge` enabled PRs
+  const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
+  log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
+
+  for (const pr of autoMergeEnabledPRs) {
+    const {
+      number: pullNumber,
+      head: { sha },
+    } = pr;
+
+    log(`Checking applicable status of #${pullNumber}`);
+
+    // #1 check whether the pr has enough approvals
+    const {
+      changesRequestedCount,
+      approvalCount,
+      requiredApprovalCount,
+    } = await getApprovalStatus(pullNumber);
+    if (changesRequestedCount || approvalCount < requiredApprovalCount) {
+      const reason = `approvalsCount: ${approvalCount}, requiredApprovalCount: ${requiredApprovalCount}, changesRequestedReviews: ${changesRequestedCount}`;
+      printFailReason(pullNumber, reason);
+      continue;
+    }
+
+    /**
+     * #2 check whether the PR needs update
+     * - the pr is mergeable: no conflicts
+     * - the pr is behind the base branch
+     */
+    const { mergeable, mergeable_state } = await getMergeableStatus(pullNumber);
+
+    if (!mergeable || mergeable_state !== 'behind') {
+      let failReason;
+      if (!mergeable) {
+        failReason = `The 'mergeable' value is: ${mergeable}`;
+      }
+      if (mergeable_state !== 'behind') {
+        failReason = `The 'mergeable_state' value is: '${mergeable_state}'. The branch is not 'behind' the base branch`;
+      }
+
+      printFailReason(pullNumber, failReason);
+      continue;
+    }
+
+    /**
+     * #3 check whether the pr has failed checks
+     * need to note: the mergeable, and mergeable_state don't reflect the checks status
+     */
+    const didChecksPass = await areAllChecksPassed(sha);
+    if (!didChecksPass) {
+      printFailReason(pullNumber, 'The PR has failed or ongoing check(s)');
+      continue;
+    }
+
+    return pr;
+  }
+
+  return null;
+};
+
+// EXTERNAL MODULE: ./src/lib/util.js
+var util = __nccwpck_require__(103);
+// CONCATENATED MODULE: ./src/index.js
+
+
+
+
+async function main() {
+  try {
+    const openPRs = await getOpenPRs();
+
+    const pr = await getAutoUpdateCandidate(openPRs);
+    if (!pr) {
+      (0,util.log)('No applicable PR to update.');
+      return;
+    }
+
+    const { number: pullNumber } = pr;
+
+    // update the pr
+    (0,util.log)(`Trying to update the branch of PR #${pullNumber}`);
+
+    // TODO (zhiye): try next the PR in the queue if update fails
+    try {
+      await updatePRBranch(pullNumber);
+      (0,util.log)('Successfully updated. Cheers 🎉!');
+    } catch (err) {
+      core.setFailed(`Fail to update PR with error: ${err}`);
+    }
+  } catch (err) {
+    core.setFailed(`Action failed with error ${err}`);
+  }
+}
+
+main();
+
+
+/***/ }),
+
+/***/ 103:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "log": () => /* binding */ log,
+/* harmony export */   "printFailReason": () => /* binding */ printFailReason,
+/* harmony export */   "wait": () => /* binding */ wait
+/* harmony export */ });
+const log = console.info.bind(null, 'LOG >');
+const printFailReason = (pullNumber, reason) =>
+  log(`Won't update #${pullNumber}, the reason:\n      > ${reason}`);
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+/***/ }),
+
 /***/ 877:
 /***/ ((module) => {
 
@@ -6151,6 +6239,23 @@ module.exports = require("zlib");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -6168,6 +6273,6 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(746);
+/******/ 	return __nccwpck_require__(478);
 /******/ })()
 ;

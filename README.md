@@ -1,7 +1,11 @@
 # PR Auto Updater Action
 
-This Github action is designed to work with the Github `auto-merge` feature.
+![GitHub Actions](https://github.com/adRise/pr-auto-updater/actions/workflows/unit_test.yml/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/adRise/pr-auto-updater/badge.svg?branch=master)](https://coveralls.io/github/adRise/pr-auto-updater)
+
+This GitHub action is designed to work with the GitHub `auto-merge` feature.
 The action will try to update the branch of the newest open PR that matches the below conditions
+
 - The PR has the auto-merge option enabled
 - The PR has 2 approvals and no changes-requested review
 - The PR has all checks passed
@@ -14,14 +18,15 @@ The action will try to update the branch of the newest open PR that matches the 
 
 **Required**
 
- The [personal access token](https://github.com/settings/tokens/).
+The [personal access token](https://github.com/settings/tokens/).
 
 Need to note, you can't use `GITHUB_TOKEN` because of [this limitation](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token)
+
 ### `base`
 
 **Required**
 
-Default: 'master'
+Default: `master`
 
 The base branch that the PR will use to get PRs, for example, `main`, `master` or `dev`.
 
@@ -35,6 +40,10 @@ Default: 2
 
 The action will skip PRs that have less approvals than `required_approval_count`.
 
+We could retrieve this value from the repo settings through an API call but that will incur one more request. GitHub has [rate limit](https://docs.github.com/en/actions/reference/usage-limits-billing-and-administration#usage-limits) on API usage of GitHub actions.
+
+> API requests - You can execute up to 1000 API requests in an hour across all actions within a repository. If exceeded, additional API calls will fail, which might cause jobs to fail.
+
 ## Example usage
 
 ```yml
@@ -45,14 +54,14 @@ on:
     branches:
       - 'master'
 jobs:
-    autoupdate:
-      runs-on: ubuntu-latest
-      steps:
+  autoupdate:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v2
         with:
           ref: 'master'
       - name: Automatically update PR
-        uses: actions/pr_updater@VERSION_YOU_WANT_TO_USE
+        uses: adRise/pr-auto-updater@VERSION_YOU_WANT_TO_USE
         with:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
@@ -66,7 +75,7 @@ Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, c
 ```bash
 yarn
 # this compile index.js to dest/init.js for running
-make
+yarn build
 ```
 
-Note: You need to run `make` before commit the changes because we want to add the compiled js file `dest/index.js` into git
+Note: You need to run `yarn build` before commit the changes because when the action only use the compiled `dest/index.js`.
