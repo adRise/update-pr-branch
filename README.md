@@ -69,9 +69,6 @@ jobs:
   autoupdate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: 'master'
       - name: Automatically update PR
         uses: adRise/update-pr-branch@VERSION_YOU_WANT_TO_USE
         with:
