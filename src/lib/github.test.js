@@ -16,6 +16,7 @@ const fakeEnv = {
   token,
   base,
   required_approval_count: requiredApprovalCount,
+  require_passed_checks: 'true'
 };
 
 const oldEnv = process.env;
@@ -396,7 +397,7 @@ describe('getAutoUpdateCanidate()', () => {
     expect(res).toBe(null);
   });
 
-  test('PR with failed checks wonnt be selected', async () => {
+  test('PR with failed checks wonnt be selected', async () => {    
     // has 2 approvals, no request for change review
     const reviews = {
       ...reviewsList,
@@ -442,6 +443,51 @@ describe('getAutoUpdateCanidate()', () => {
       'The PR has failed or ongoing check(s)',
     );
     expect(res).toBe(null);
+  });
+  test('PR with failed checks will be selected if require_passed_checks is false', async () => {
+    process.env.require_passed_checks = 'false';
+
+    // has 2 approvals, no request for change review
+    const reviews = {
+      ...reviewsList,
+      data: [
+        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[0], state: 'APPROVED' },
+      ],
+    };
+    // pr mergeable: true, merge_state: clean
+    const prData = {
+      data: {
+        ...prMetaData.data,
+        ...{ mergeable: true, mergeable_state: 'behind' },
+      },
+    };
+
+    const check = checksList.data.check_runs[0];
+    const checks = {
+      ...checksList,
+      data: {
+        total_count: 2,
+        check_runs: [
+          { ...check, conclusion: 'success' },
+          { ...check, conclusion: 'failure' },
+        ],
+      },
+    };
+
+    // has auto-merge PR
+    const prList = [{ ...pullsList.data[0], auto_merge: {} }];
+    const mockedListReviews = jest.fn().mockResolvedValue(reviews);
+    const mockedGet = jest.fn().mockResolvedValue(prData);
+    const mockedListForRef = jest.fn().mockResolvedValue(checks);
+
+    github.getOctokit.mockReturnValue({
+      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      checks: { listForRef: mockedListForRef },
+    });
+
+    const res = await gitLib.getAutoUpdateCandidate(prList);
+    expect(res).toBe(prList[0]);
   });
   test('Should return the first PR if it is all good', async () => {
     // has 2 approvals, no request for change review

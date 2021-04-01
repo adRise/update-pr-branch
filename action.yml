@@ -15,6 +15,10 @@ inputs:
     required: true
     description: 'The action will skip PRs that have less approvals than this value'
     default: '2'
+  require_passed_checks:
+    required: false
+    description: "If the action should skip PRs that have failed checks, defaults to `true`"
+    default: "true"
 runs:
   using: 'node12'
   main: 'dest/index.js'
