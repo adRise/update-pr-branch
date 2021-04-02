@@ -495,14 +495,14 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'CHANGES_REQUESTED' },
+        { ...reviewsList.data[1], state: 'CHANGES_REQUESTED' },
       ],
     };
     const reviewsSecond = {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     // pr mergeable: true, merge_state: clean
