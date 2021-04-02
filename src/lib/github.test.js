@@ -335,7 +335,7 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     const prData = {
@@ -368,7 +368,7 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     // pr mergeable: true, merge_state: clean
@@ -402,7 +402,7 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     // pr mergeable: true, merge_state: clean
@@ -449,7 +449,7 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     // pr mergeable: true, merge_state: clean
