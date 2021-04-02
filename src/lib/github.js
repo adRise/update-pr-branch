@@ -115,10 +115,13 @@ export const getApprovalStatus = async (pullNumber) => {
     pull_number: pullNumber,
   });
 
+  let reviewers = Set();
   let changesRequestedCount = 0;
   let approvalCount = 0;
 
-  reviewsData.forEach(({ state }) => {
+  reviewsData.reverse().forEach(({ state, user }) => {
+    if (reviewers.has(user.login)) return;
+    reviewers.add(user.login);
     if (state === 'CHANGES_REQUESTED') changesRequestedCount += 1;
     if (state === 'APPROVED') approvalCount += 1;
   });
