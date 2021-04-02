@@ -115,7 +115,7 @@ export const getApprovalStatus = async (pullNumber) => {
     pull_number: pullNumber,
   });
 
-  let reviewers = Set();
+  let reviewers = new Set();
   let changesRequestedCount = 0;
   let approvalCount = 0;
 
