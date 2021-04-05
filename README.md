@@ -8,8 +8,8 @@
 The job of the action is to help click "Update branch" button for you. Designed to work with the `auto-merge` and ["Require branches to be up to date before merging"](https://docs.github.com/en/github/administering-a-repository/about-protected-branches#require-status-checks-before-merging) options. It will update the newest open PR that match the below conditions
 
 - The PR has the `auto-merge` option enabled
-- The PR has 2 approvals and no changes-requested review
-- The PR has all checks passed
+- The PR has 2 approvals and no changes-requested review (configurable)
+- The PR has all checks passed (configurable)
 - The PR branch has no conflicts with the base branch
 - The PR branch is behind the base branch
 
@@ -54,7 +54,13 @@ The action will skip PRs that have less approvals than `required_approval_count`
 
 We could retrieve this value from the repo settings through an API call but that will incur one more request. GitHub has [rate limit](https://docs.github.com/en/actions/reference/usage-limits-billing-and-administration#usage-limits) on API usage of GitHub actions.
 
-> API requests - You can execute up to 1000 API requests in an hour across all actions within a repository. If exceeded, additional API calls will fail, which might cause jobs to fail.
+### `require_passed_checks`
+
+**Optional**
+
+Default: true
+
+The action will skip PRs that have failed checks.
 
 ## Example usage
 
@@ -75,6 +81,7 @@ jobs:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
           required_approval_count: 2
+          require_passed_checks: false
 ```
 
 Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)

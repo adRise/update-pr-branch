@@ -137,6 +137,8 @@ export const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
   const requiredApprovalCount = core.getInput('required_approval_count');
+  const requirePassedChecks = /true/i.test(core.getInput('require_passed_checks'));
+
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
   log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
@@ -183,12 +185,15 @@ export const getAutoUpdateCandidate = async (openPRs) => {
 
     /**
      * #3 check whether the pr has failed checks
+     * only happens if require_passed_checks input is true
      * need to note: the mergeable, and mergeable_state don't reflect the checks status
      */
-    const didChecksPass = await areAllChecksPassed(sha);
-    if (!didChecksPass) {
-      printFailReason(pullNumber, 'The PR has failed or ongoing check(s)');
-      continue;
+    if (requirePassedChecks) {
+      const didChecksPass = await areAllChecksPassed(sha);
+      if (!didChecksPass) {
+        printFailReason(pullNumber, 'The PR has failed or ongoing check(s)');
+        continue;
+      }
     }
 
     return pr;
