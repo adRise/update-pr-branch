@@ -397,7 +397,7 @@ describe('getAutoUpdateCanidate()', () => {
     expect(res).toBe(null);
   });
 
-  test('PR with failed checks wonnt be selected', async () => {    
+  test('PR with failed checks wonnt be selected', async () => {
     // has 2 approvals, no request for change review
     const reviews = {
       ...reviewsList,
