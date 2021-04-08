@@ -69,7 +69,6 @@ export const getMergeableStatus = async (pullNumber) => {
   if (mergeableStatus.mergeable_state === 'unknown') {
     // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
     // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
-    console.info(mergeableStatus, wait);
     await wait(3000);
     data = await getPR(pullNumber);
     mergeableStatus = {
