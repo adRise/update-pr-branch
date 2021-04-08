@@ -243,7 +243,7 @@ describe('getApprovalStatus()', () => {
   });
 });
 
-describe('getAutoUpdateCanidate()', () => {
+describe('getAutoUpdateCandidate()', () => {
   const pullsList = require('../../test/fixtures/pulls_list.json');
   const reviewsList = require('../../test/fixtures/list_reviews.json');
   const prMetaData = require('../../test/fixtures/pr_metadata.json');
@@ -397,7 +397,7 @@ describe('getAutoUpdateCanidate()', () => {
     expect(res).toBe(null);
   });
 
-  test('PR with failed checks wonnt be selected', async () => {
+  test('PR with failed checks wont be selected', async () => {
     // has 2 approvals, no request for change review
     const reviews = {
       ...reviewsList,
@@ -452,7 +452,7 @@ describe('getAutoUpdateCanidate()', () => {
       ...reviewsList,
       data: [
         { ...reviewsList.data[0], state: 'APPROVED' },
-        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
       ],
     };
     // pr mergeable: true, merge_state: clean
