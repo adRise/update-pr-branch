@@ -329,6 +329,35 @@ describe('getAutoUpdateCandidate()', () => {
     expect(mockedGet).toHaveBeenCalledTimes(0);
     expect(res).toBe(null);
   });
+  
+  test('PR with approvals from a single users will not be selected', async () => {
+    // 2 approvals, but from the same user
+    const reviews = {
+      ...reviewsList,
+      data: [
+        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[0], state: 'APPROVED' },
+      ],
+    };
+    const prList = [{ ...pullsList.data[0], auto_merge: {} }];
+    const mockedListReviews = jest.fn().mockResolvedValue(reviews);
+    const mockedGet = jest.fn();
+
+    github.getOctokit.mockReturnValue({
+      pulls: { listReviews: mockedListReviews, get: mockedGet },
+    });
+
+    const res = await gitLib.getAutoUpdateCandidate(prList);
+    expect(mockedListReviews).toHaveBeenCalled();
+    expect(utils.log).toHaveBeenCalledTimes(2);
+    expect(utils.printFailReason).toHaveBeenCalledTimes(1);
+    expect(utils.printFailReason).toHaveBeenCalledWith(
+      prList[0].number,
+      `approvalsCount: 1, requiredApprovalCount: ${requiredApprovalCount}, changesRequestedReviews: 0`,
+    );
+    expect(mockedGet).toHaveBeenCalledTimes(0);
+    expect(res).toBe(null);
+  });
 
   test('PR with mergeable !== true will not be selected', async () => {
     // has 2 approvals, not request for change review
@@ -489,6 +518,53 @@ describe('getAutoUpdateCandidate()', () => {
     const res = await gitLib.getAutoUpdateCandidate(prList);
     expect(res).toBe(prList[0]);
   });
+  
+  test('Should ignore trailing comment reviews', async () => {
+    // has approvals, and some reviews at the end
+    const reviews = {
+      ...reviewsList,
+      data: [
+        { ...reviewsList.data[0], state: 'APPROVED' },
+        { ...reviewsList.data[1], state: 'APPROVED' },
+        { ...reviewsList.data[0], state: 'COMMENTED' },
+        { ...reviewsList.data[2], state: 'COMMENTED' },
+      ],
+    };
+    // pr mergeable: true, merge_state: clean
+    const prData = {
+      data: {
+        ...prMetaData.data,
+        ...{ mergeable: true, mergeable_state: 'behind' },
+      },
+    };
+
+    const check = checksList.data.check_runs[0];
+    const checks = {
+      ...checksList,
+      data: {
+        total_count: 2,
+        check_runs: [
+          { ...check, conclusion: 'success' },
+          { ...check, conclusion: 'success' },
+        ],
+      },
+    };
+
+    // has auto-merge PR
+    const prList = [{ ...pullsList.data[0], auto_merge: {} }];
+    const mockedListReviews = jest.fn().mockResolvedValue(reviews);
+    const mockedGet = jest.fn().mockResolvedValue(prData);
+    const mockedListForRef = jest.fn().mockResolvedValue(checks);
+
+    github.getOctokit.mockReturnValue({
+      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      checks: { listForRef: mockedListForRef },
+    });
+
+    const res = await gitLib.getAutoUpdateCandidate(prList);
+    expect(res).toEqual(prList[0]);
+  });
+  
   test('Should return the first PR if it is all good', async () => {
     // has 2 approvals, no request for change review
     const reviews = {
