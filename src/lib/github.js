@@ -69,7 +69,6 @@ export const getMergeableStatus = async (pullNumber) => {
   if (mergeableStatus.mergeable_state === 'unknown') {
     // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
     // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
-    console.info(mergeableStatus, wait);
     await wait(3000);
     data = await getPR(pullNumber);
     mergeableStatus = {
@@ -102,8 +101,7 @@ export const areAllChecksPassed = async (sha) => {
 };
 
 /**
- * check whether PR is mergeable from the Approval perspective
- * the pr needs to have minimum required approvals && no request-for-changes reviews
+ * get the count of the latest concluding review (approved or CHANGES_REQUESTED) of each reviewer
  */
 export const getApprovalStatus = async (pullNumber) => {
   const octokit = getOctokit();
@@ -120,11 +118,15 @@ export const getApprovalStatus = async (pullNumber) => {
   let approvalCount = 0;
 
   reviewsData.reverse().forEach(({ state, user }) => {
-    if (reviewers.has(user.login)) return;
+    const reviewer = user.login;
+
+    // only count the latest concluding review per perviewer
+    if (reviewers.has(reviewer)) return;
     if (!['CHANGES_REQUESTED', 'APPROVED'].includes(state)) return;
+
     if (state === 'CHANGES_REQUESTED') changesRequestedCount += 1;
     if (state === 'APPROVED') approvalCount += 1;
-    reviewers.add(user.login);
+    reviewers.add(reviewer);
   });
 
   return {
@@ -141,7 +143,7 @@ export const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
   const requiredApprovalCount = core.getInput('required_approval_count');
-  const requirePassedChecks = /true/i.test(core.getInput('require_passed_checks'));
+  const requirePassedChecks = core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
 
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
