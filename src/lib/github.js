@@ -11,11 +11,16 @@ export const getOpenPRs = async () => {
   const octokit = getOctokit();
   const repo = github.context.repo;
   const baseBranch = core.getInput('base');
+  const githubSort = core.getInput('github_sort').toLowerCase() || null;
+  const githubSortDirection =
+    core.getInput('github_sort_direction').toLowerCase() || null;
 
   const { data } = await octokit.pulls.list({
     ...repo,
     base: baseBranch,
     state: 'open',
+    sort: githubSort,
+    direction: githubSortDirection,
   });
 
   return data;
@@ -143,7 +148,8 @@ export const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
   const requiredApprovalCount = core.getInput('required_approval_count');
-  const requirePassedChecks = core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
+  const requirePassedChecks =
+    core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
 
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
@@ -158,11 +164,8 @@ export const getAutoUpdateCandidate = async (openPRs) => {
     log(`Checking applicable status of #${pullNumber}`);
 
     // #1 check whether the pr has enough approvals
-    const {
-      changesRequestedCount,
-      approvalCount,
-      requiredApprovalCount,
-    } = await getApprovalStatus(pullNumber);
+    const { changesRequestedCount, approvalCount, requiredApprovalCount } =
+      await getApprovalStatus(pullNumber);
     if (changesRequestedCount || approvalCount < requiredApprovalCount) {
       const reason = `approvalsCount: ${approvalCount}, requiredApprovalCount: ${requiredApprovalCount}, changesRequestedReviews: ${changesRequestedCount}`;
       printFailReason(pullNumber, reason);
