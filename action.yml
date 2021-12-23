@@ -1,5 +1,5 @@
 name: 'Update PR Branch'
-description: 'Automatically update the branch of newest ready to merge PR. Designed to work with the auto-merge option.'
+description: 'Automatically update the branch of newest (by default) ready to merge PR. Designed to work with the auto-merge option.'
 branding:
   icon: git-pull-request
   color: orange
@@ -17,8 +17,15 @@ inputs:
     default: '2'
   require_passed_checks:
     required: false
-    description: "If the action should skip PRs that have failed checks, defaults to `true`"
-    default: "true"
+    description: 'If the action should skip PRs that have failed checks, defaults to `true`'
+    default: 'true'
+  github_sort:
+    required: false
+    description: 'What to sort results by. Can be either `created`, `updated`, `popularity` (comment count) or `long-running` (age, filtering by pulls updated in the last month).'
+  github_sort_direction:
+    required: false
+    description: 'The direction of the github_sort. Can be either `asc` or `desc`. Default: `desc` when github_sort is created or github_sort is not specified, otherwise `asc`.'
+
 runs:
   using: 'node12'
   main: 'dest/index.js'

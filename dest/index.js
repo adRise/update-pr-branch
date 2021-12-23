@@ -1461,7 +1461,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(287);
+var isPlainObject = __nccwpck_require__(558);
 var universalUserAgent = __nccwpck_require__(429);
 
 function lowercaseKeys(object) {
@@ -1847,6 +1847,52 @@ const endpoint = withDefaults(null, DEFAULTS);
 
 exports.endpoint = endpoint;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 558:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3336,7 +3382,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __nccwpck_require__(440);
 var universalUserAgent = __nccwpck_require__(429);
-var isPlainObject = __nccwpck_require__(287);
+var isPlainObject = __nccwpck_require__(62);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
@@ -3476,6 +3522,52 @@ const request = withDefaults(endpoint.endpoint, {
 
 exports.request = request;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 62:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3681,52 +3773,6 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 287:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -5806,11 +5852,16 @@ const getOpenPRs = async () => {
   const octokit = getOctokit();
   const repo = github.context.repo;
   const baseBranch = github_core.getInput('base');
+  const githubSort = github_core.getInput('github_sort').toLowerCase() || null;
+  const githubSortDirection =
+    github_core.getInput('github_sort_direction').toLowerCase() || null;
 
   const { data } = await octokit.pulls.list({
     ...repo,
     base: baseBranch,
     state: 'open',
+    sort: githubSort,
+    direction: githubSortDirection,
   });
 
   return data;
@@ -5864,7 +5915,6 @@ const getMergeableStatus = async (pullNumber) => {
   if (mergeableStatus.mergeable_state === 'unknown') {
     // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
     // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
-    console.info(mergeableStatus, wait);
     await wait(3000);
     data = await getPR(pullNumber);
     mergeableStatus = {
@@ -5897,8 +5947,7 @@ const areAllChecksPassed = async (sha) => {
 };
 
 /**
- * check whether PR is mergeable from the Approval perspective
- * the pr needs to have minimum required approvals && no request-for-changes reviews
+ * get the count of the latest concluding review (approved or CHANGES_REQUESTED) of each reviewer
  */
 const getApprovalStatus = async (pullNumber) => {
   const octokit = getOctokit();
@@ -5910,12 +5959,20 @@ const getApprovalStatus = async (pullNumber) => {
     pull_number: pullNumber,
   });
 
+  let reviewers = new Set();
   let changesRequestedCount = 0;
   let approvalCount = 0;
 
-  reviewsData.forEach(({ state }) => {
+  reviewsData.reverse().forEach(({ state, user }) => {
+    const reviewer = user.login;
+
+    // only count the latest concluding review per perviewer
+    if (reviewers.has(reviewer)) return;
+    if (!['CHANGES_REQUESTED', 'APPROVED'].includes(state)) return;
+
     if (state === 'CHANGES_REQUESTED') changesRequestedCount += 1;
     if (state === 'APPROVED') approvalCount += 1;
+    reviewers.add(reviewer);
   });
 
   return {
@@ -5932,7 +5989,8 @@ const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
   const requiredApprovalCount = github_core.getInput('required_approval_count');
-  const requirePassedChecks = /true/i.test(github_core.getInput('require_passed_checks'));
+  const requirePassedChecks =
+    github_core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
 
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
@@ -5947,11 +6005,8 @@ const getAutoUpdateCandidate = async (openPRs) => {
     log(`Checking applicable status of #${pullNumber}`);
 
     // #1 check whether the pr has enough approvals
-    const {
-      changesRequestedCount,
-      approvalCount,
-      requiredApprovalCount,
-    } = await getApprovalStatus(pullNumber);
+    const { changesRequestedCount, approvalCount, requiredApprovalCount } =
+      await getApprovalStatus(pullNumber);
     if (changesRequestedCount || approvalCount < requiredApprovalCount) {
       const reason = `approvalsCount: ${approvalCount}, requiredApprovalCount: ${requiredApprovalCount}, changesRequestedReviews: ${changesRequestedCount}`;
       printFailReason(pullNumber, reason);
