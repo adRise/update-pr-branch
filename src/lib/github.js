@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { log, printFailReason, wait } = require('./util');
+const { log, printFailReason, wait, isStringTrue } = require('./util');
 
 const getOctokit = () => {
   const token = core.getInput('token');
@@ -11,16 +11,22 @@ export const getOpenPRs = async () => {
   const octokit = getOctokit();
   const repo = github.context.repo;
   const baseBranch = core.getInput('base');
-  const githubSort = core.getInput('github_sort').toLowerCase() || null;
-  const githubSortDirection =
-    core.getInput('github_sort_direction').toLowerCase() || null;
+  const sort = core.getInput('sort');
+  const sortDirection = core.getInput('direction');
+
+  let sortConfig = {};
+  if (sort) {
+    sortConfig = {
+      sort: sort.toLowerCase(),
+      direction: sortDirection ? sortDirection.toLowerCase() : undefined,
+    };
+  }
 
   const { data } = await octokit.pulls.list({
     ...repo,
     base: baseBranch,
     state: 'open',
-    sort: githubSort,
-    direction: githubSortDirection,
+    ...sortConfig,
   });
 
   return data;
@@ -147,9 +153,9 @@ export const getApprovalStatus = async (pullNumber) => {
 export const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
-  const requiredApprovalCount = core.getInput('required_approval_count');
-  const requirePassedChecks =
-    core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
+  const requirePassedChecks = isStringTrue(
+    core.getInput('require_passed_checks'),
+  );
 
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);

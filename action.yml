@@ -19,12 +19,12 @@ inputs:
     required: false
     description: 'If the action should skip PRs that have failed checks, defaults to `true`'
     default: 'true'
-  github_sort:
+  sort:
     required: false
     description: 'What to sort results by. Can be either `created`, `updated`, `popularity` (comment count) or `long-running` (age, filtering by pulls updated in the last month).'
-  github_sort_direction:
+  direction:
     required: false
-    description: 'The direction of the github_sort. Can be either `asc` or `desc`. Default: `desc` when github_sort is created or github_sort is not specified, otherwise `asc`.'
+    description: 'The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when `sort` is `created` or `sort` is not specified, otherwise `asc`.'
 
 runs:
   using: 'node12'

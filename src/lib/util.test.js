@@ -40,3 +40,17 @@ describe('log()', () => {
     expect(console.info).toHaveBeenLastCalledWith('LOG >', msg);
   });
 });
+
+describe('isStringTrue()', () => {
+  const isStringTrue = utils.isStringTrue;
+  test('should return the correct value based on the string', () => {
+    expect(isStringTrue('true')).toBe(true);
+    expect(isStringTrue('True')).toBe(true);
+    expect(isStringTrue('TRUE')).toBe(true);
+    expect(isStringTrue('tRue')).toBe(true);
+    expect(isStringTrue('false')).toBe(false);
+    expect(isStringTrue('False')).toBe(false);
+    expect(isStringTrue('FALSE')).toBe(false);
+    expect(isStringTrue('fAlse')).toBe(false);
+  });
+});
