@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: npm install
+      - name: lint
+        run: yarn lint
       - name: run unit test
         run: yarn test
       - name: Coveralls

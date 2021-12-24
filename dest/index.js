@@ -5841,7 +5841,7 @@ var core = __nccwpck_require__(186);
 // CONCATENATED MODULE: ./src/lib/github.js
 const github_core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
-const { log, printFailReason, wait } = __nccwpck_require__(103);
+const { log, printFailReason, wait, isStringTrue } = __nccwpck_require__(103);
 
 const getOctokit = () => {
   const token = github_core.getInput('token');
@@ -5852,16 +5852,22 @@ const getOpenPRs = async () => {
   const octokit = getOctokit();
   const repo = github.context.repo;
   const baseBranch = github_core.getInput('base');
-  const githubSort = github_core.getInput('github_sort').toLowerCase() || null;
-  const githubSortDirection =
-    github_core.getInput('github_sort_direction').toLowerCase() || null;
+  const sort = github_core.getInput('sort');
+  const sortDirection = github_core.getInput('direction');
+
+  let sortConfig = {};
+  if (sort) {
+    sortConfig = {
+      sort: sort.toLowerCase(),
+      direction: sortDirection ? sortDirection.toLowerCase() : undefined,
+    };
+  }
 
   const { data } = await octokit.pulls.list({
     ...repo,
     base: baseBranch,
     state: 'open',
-    sort: githubSort,
-    direction: githubSortDirection,
+    ...sortConfig,
   });
 
   return data;
@@ -5988,9 +5994,9 @@ const getApprovalStatus = async (pullNumber) => {
 const getAutoUpdateCandidate = async (openPRs) => {
   if (!openPRs) return null;
 
-  const requiredApprovalCount = github_core.getInput('required_approval_count');
-  const requirePassedChecks =
-    github_core.getInput('require_passed_checks').toUpperCase() === 'TRUE';
+  const requirePassedChecks = isStringTrue(
+    github_core.getInput('require_passed_checks'),
+  );
 
   // only update `auto merge` enabled PRs
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
@@ -6099,12 +6105,14 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "log": () => /* binding */ log,
 /* harmony export */   "printFailReason": () => /* binding */ printFailReason,
-/* harmony export */   "wait": () => /* binding */ wait
+/* harmony export */   "wait": () => /* binding */ wait,
+/* harmony export */   "isStringTrue": () => /* binding */ isStringTrue
 /* harmony export */ });
 const log = console.info.bind(null, 'LOG >');
 const printFailReason = (pullNumber, reason) =>
   log(`Won't update #${pullNumber}, the reason:\n      > ${reason}`);
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const isStringTrue = (str = '') => str.toLowerCase() === 'true';
 
 
 /***/ }),
