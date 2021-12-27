@@ -53,4 +53,9 @@ describe('isStringTrue()', () => {
     expect(isStringTrue('FALSE')).toBe(false);
     expect(isStringTrue('fAlse')).toBe(false);
   });
+
+  test('should return false if the string is not a boolean', () => {
+    expect(isStringTrue('something')).toBe(false);
+    expect(isStringTrue()).toBe(false);
+  });
 });

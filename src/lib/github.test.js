@@ -145,6 +145,27 @@ describe('getOpenPRs()', () => {
       }),
     );
   });
+  test('when sort direct is not set', async () => {
+    process.env = {
+      ...oldEnv,
+      ...fakeEnv,
+      sort: 'updated',
+    };
+    core.getInput.mockImplementation((name) => process.env[name]);
+
+    const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
+    github.getOctokit.mockReturnValue({
+      pulls: { list: mockedMethod },
+    });
+    await gitLib.getOpenPRs(pullNumber);
+
+    expect(mockedMethod).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: 'updated',
+        direction: undefined,
+      }),
+    );
+  });
 });
 
 describe('getMergeableStatus()', () => {
