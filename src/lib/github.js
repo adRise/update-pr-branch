@@ -1,6 +1,12 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { log, printFailReason, wait, isStringTrue } = require('./util');
+const {
+  log,
+  printFailReason,
+  wait,
+  isStringTrue,
+  isStringFalse,
+} = require('./util');
 
 const getOctokit = () => {
   const token = core.getInput('token');
@@ -147,6 +153,20 @@ export const getApprovalStatus = async (pullNumber) => {
   };
 };
 
+export const filterApplicablePRs = (openPRs) => {
+  const autoMergeEnabledConfigured = core.getInput(
+    'require_auto_merge_enabled',
+  );
+  if (
+    autoMergeEnabledConfigured === false ||
+    isStringFalse(autoMergeEnabledConfigured)
+  ) {
+    return openPRs;
+  }
+  const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
+  log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
+  return autoMergeEnabledPRs;
+};
 /**
  * find a applicable PR to update
  */
@@ -156,12 +176,9 @@ export const getAutoUpdateCandidate = async (openPRs) => {
   const requirePassedChecks = isStringTrue(
     core.getInput('require_passed_checks'),
   );
+  const applicablePRs = filterApplicablePRs(openPRs);
 
-  // only update `auto merge` enabled PRs
-  const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
-  log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
-
-  for (const pr of autoMergeEnabledPRs) {
+  for (const pr of applicablePRs) {
     const {
       number: pullNumber,
       head: { sha },

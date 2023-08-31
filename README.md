@@ -76,6 +76,14 @@ Notice: this is an option provided by github rest api. In this github action, we
 
 The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when sort is `created` or sort is not specified, otherwise `asc`.
 
+### `require_auto_merge_enabled`
+
+**Optional**
+
+Check if having auto-merge enabled in the PR is required, in order for the PR to
+be considered. It defaults to `true`, but if set to `false`, all PRs are
+considered for update (not just those with auto-merge enabled.)
+
 This github action doesn't set any default parameters.
 
 ## Example usage
@@ -100,6 +108,7 @@ jobs:
           require_passed_checks: false
           sort: 'created'
           direction: 'desc'
+          require_auto_merge_enabled: false
 ```
 
 Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
