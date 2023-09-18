@@ -154,13 +154,8 @@ export const getApprovalStatus = async (pullNumber) => {
 };
 
 export const filterApplicablePRs = (openPRs) => {
-  const autoMergeEnabledConfigured = core.getInput(
-    'require_auto_merge_enabled',
-  );
-  if (
-    autoMergeEnabledConfigured === false ||
-    isStringFalse(autoMergeEnabledConfigured)
-  ) {
+  const includeNonAutoMergePRs = isStringFalse(core.getInput('require_auto_merge_enabled'));
+  if (includeNonAutoMergePRs) {
     return openPRs;
   }
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
