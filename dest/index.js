@@ -5949,13 +5949,8 @@ const getApprovalStatus = async (pullNumber) => {
 };
 
 const filterApplicablePRs = (openPRs) => {
-  const autoMergeEnabledConfigured = github_core.getInput(
-    'require_auto_merge_enabled',
-  );
-  if (
-    autoMergeEnabledConfigured === false ||
-    isStringFalse(autoMergeEnabledConfigured)
-  ) {
+  const includeNonAutoMergePRs = isStringFalse(github_core.getInput('require_auto_merge_enabled'));
+  if (includeNonAutoMergePRs) {
     return openPRs;
   }
   const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
@@ -6085,7 +6080,7 @@ const printFailReason = (pullNumber, reason) =>
   log(`Won't update #${pullNumber}, the reason:\n      > ${reason}`);
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const isStringTrue = (str = '') => str.toLowerCase() === 'true';
-const isStringFalse = (str = '') => str.toLowerCase() === 'false';
+const isStringFalse = (str = '') => str.toString().toLowerCase() === 'false';
 
 
 /***/ }),
