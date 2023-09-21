@@ -1461,7 +1461,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(558);
+var isPlainObject = __nccwpck_require__(287);
 var universalUserAgent = __nccwpck_require__(429);
 
 function lowercaseKeys(object) {
@@ -1847,52 +1847,6 @@ const endpoint = withDefaults(null, DEFAULTS);
 
 exports.endpoint = endpoint;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 558:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3382,7 +3336,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __nccwpck_require__(440);
 var universalUserAgent = __nccwpck_require__(429);
-var isPlainObject = __nccwpck_require__(62);
+var isPlainObject = __nccwpck_require__(287);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
@@ -3522,52 +3476,6 @@ const request = withDefaults(endpoint.endpoint, {
 
 exports.request = request;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 62:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3773,6 +3681,52 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
+
+
+/***/ }),
+
+/***/ 287:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -5841,7 +5795,13 @@ var core = __nccwpck_require__(186);
 // CONCATENATED MODULE: ./src/lib/github.js
 const github_core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
-const { log, printFailReason, wait, isStringTrue } = __nccwpck_require__(103);
+const {
+  log,
+  printFailReason,
+  wait,
+  isStringTrue,
+  isStringFalse,
+} = __nccwpck_require__(103);
 
 const getOctokit = () => {
   const token = github_core.getInput('token');
@@ -5988,6 +5948,15 @@ const getApprovalStatus = async (pullNumber) => {
   };
 };
 
+const filterApplicablePRs = (openPRs) => {
+  const includeNonAutoMergePRs = isStringFalse(github_core.getInput('require_auto_merge_enabled'));
+  if (includeNonAutoMergePRs) {
+    return openPRs;
+  }
+  const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
+  log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
+  return autoMergeEnabledPRs;
+};
 /**
  * find a applicable PR to update
  */
@@ -5997,12 +5966,9 @@ const getAutoUpdateCandidate = async (openPRs) => {
   const requirePassedChecks = isStringTrue(
     github_core.getInput('require_passed_checks'),
   );
+  const applicablePRs = filterApplicablePRs(openPRs);
 
-  // only update `auto merge` enabled PRs
-  const autoMergeEnabledPRs = openPRs.filter((item) => item.auto_merge);
-  log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
-
-  for (const pr of autoMergeEnabledPRs) {
+  for (const pr of applicablePRs) {
     const {
       number: pullNumber,
       head: { sha },
@@ -6106,13 +6072,15 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */   "log": () => /* binding */ log,
 /* harmony export */   "printFailReason": () => /* binding */ printFailReason,
 /* harmony export */   "wait": () => /* binding */ wait,
-/* harmony export */   "isStringTrue": () => /* binding */ isStringTrue
+/* harmony export */   "isStringTrue": () => /* binding */ isStringTrue,
+/* harmony export */   "isStringFalse": () => /* binding */ isStringFalse
 /* harmony export */ });
 const log = console.info.bind(null, 'LOG >');
 const printFailReason = (pullNumber, reason) =>
   log(`Won't update #${pullNumber}, the reason:\n      > ${reason}`);
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const isStringTrue = (str = '') => str.toLowerCase() === 'true';
+const isStringFalse = (str = '') => str.toString().toLowerCase() === 'false';
 
 
 /***/ }),

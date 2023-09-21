@@ -364,6 +364,15 @@ describe('getAutoUpdateCandidate()', () => {
     expect(res).toBe(null);
   });
 
+  [false, 'false'].forEach((value) => {
+    test(`Filter applicable PRs can exclude auto-merge if configured with ${value} (${typeof value})`, async () => {
+      const data = { require_auto_merge_enabled: value };
+      core.getInput.mockImplementation((name) => data[name]);
+      const obtained = gitLib.filterApplicablePRs(pullsList);
+      expect(obtained.length).toBe(pullsList.length);
+    });
+  });
+
   test('PR with request-for-change review will not be selected', async () => {
     const prList = [{ ...pullsList.data[0], auto_merge: {} }];
     const mockedListReviews = jest.fn().mockResolvedValue(reviewsList);
