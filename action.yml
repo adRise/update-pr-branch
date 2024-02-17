@@ -4,13 +4,13 @@ branding:
   icon: git-pull-request
   color: orange
 inputs:
-  token:
-    description: 'The GitHub personal access token'
-    required: true
   base:
     required: true
     description: 'The base branch that this action will use to get PRs'
     default: 'master'
+  direction:
+    required: false
+    description: 'The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when `sort` is `created` or `sort` is not specified, otherwise `asc`.'
   required_approval_count:
     required: true
     description: 'The action will skip PRs that have less approvals than this value'
@@ -19,12 +19,16 @@ inputs:
     required: false
     description: 'If the action should skip PRs that have failed checks, defaults to `true`'
     default: 'true'
+  require_auto_merge_enabled:
+    required: false
+    description: 'If the action should skip PRs that have failed checks, defaults to `true`'
+    default: 'true'
   sort:
     required: false
     description: 'What to sort results by. Can be either `created`, `updated`, `popularity` (comment count) or `long-running` (age, filtering by pulls updated in the last month).'
-  direction:
-    required: false
-    description: 'The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when `sort` is `created` or `sort` is not specified, otherwise `asc`.'
+  token:
+    description: 'The GitHub personal access token'
+    required: true
 
 runs:
   using: 'node12'
