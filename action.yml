@@ -21,7 +21,7 @@ inputs:
     default: 'true'
   require_auto_merge_enabled:
     required: false
-    description: 'If the action should skip PRs that have failed checks, defaults to `true`'
+    description: 'When set to false, the action includes PRs without auto-merge; the default true excludes such PRs.'
     default: 'true'
   sort:
     required: false
