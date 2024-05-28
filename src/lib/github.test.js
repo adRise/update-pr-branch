@@ -57,7 +57,7 @@ describe('updatePRBranch()', () => {
 
   beforeEach(() => {
     github.getOctokit.mockReturnValue({
-      pulls: { updateBranch: mockedUpdateBranch },
+      rest: { pulls: { updateBranch: mockedUpdateBranch } },
     });
   });
   afterEach(() => {
@@ -86,7 +86,7 @@ describe('getPR()', () => {
   test('should send the expected parameters', async () => {
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
     github.getOctokit.mockReturnValue({
-      pulls: { get: mockedMethod },
+      rest: { pulls: { get: mockedMethod } },
     });
     const res = await gitLib.getPR(pullNumber);
 
@@ -110,7 +110,7 @@ describe('getOpenPRs()', () => {
   test('should send the expected parameters', async () => {
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
     github.getOctokit.mockReturnValue({
-      pulls: { list: mockedMethod },
+      rest: { pulls: { list: mockedMethod } },
     });
     const res = await gitLib.getOpenPRs(pullNumber);
 
@@ -134,7 +134,7 @@ describe('getOpenPRs()', () => {
 
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
     github.getOctokit.mockReturnValue({
-      pulls: { list: mockedMethod },
+      rest: { pulls: { list: mockedMethod } },
     });
     await gitLib.getOpenPRs(pullNumber);
 
@@ -155,7 +155,7 @@ describe('getOpenPRs()', () => {
 
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
     github.getOctokit.mockReturnValue({
-      pulls: { list: mockedMethod },
+      rest: { pulls: { list: mockedMethod } },
     });
     await gitLib.getOpenPRs(pullNumber);
 
@@ -183,7 +183,7 @@ describe('getMergeableStatus()', () => {
     };
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
     github.getOctokit.mockReturnValue({
-      pulls: { get: mockedMethod },
+      rest: { pulls: { get: mockedMethod } },
     });
     const status = await gitLib.getMergeableStatus();
     expect(status).toEqual(mergeableStatus);
@@ -203,7 +203,7 @@ describe('getMergeableStatus()', () => {
       .mockResolvedValueOnce(mockedResponseFinal);
 
     github.getOctokit.mockReturnValue({
-      pulls: { get: mockedMethod },
+      rest: { pulls: { get: mockedMethod } },
     });
     jest.spyOn(utils, 'wait').mockImplementation();
 
@@ -230,7 +230,7 @@ describe('areAllChecksPassed()', () => {
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
 
     github.getOctokit.mockReturnValue({
-      checks: { listForRef: mockedMethod },
+      rest: { checks: { listForRef: mockedMethod } },
     });
 
     const result = await gitLib.areAllChecksPassed(sha);
@@ -246,7 +246,7 @@ describe('areAllChecksPassed()', () => {
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
 
     github.getOctokit.mockReturnValue({
-      checks: { listForRef: mockedMethod },
+      rest: { checks: { listForRef: mockedMethod } },
     });
 
     const result = await gitLib.areAllChecksPassed(sha);
@@ -265,7 +265,7 @@ describe('areAllChecksPassed()', () => {
     const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
 
     github.getOctokit.mockReturnValue({
-      checks: { listForRef: mockedMethod },
+      rest: { checks: { listForRef: mockedMethod } },
     });
 
     const result = await gitLib.areAllChecksPassed(sha);
@@ -284,7 +284,7 @@ describe('getApprovalStatus()', () => {
     const mockedMethod = jest.fn().mockResolvedValue(reviewsList);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedMethod },
+      rest: { pulls: { listReviews: mockedMethod } },
     });
 
     const result = await gitLib.getApprovalStatus(pullNumber);
@@ -311,7 +311,7 @@ describe('getApprovalStatus()', () => {
     const mockedMethod = jest.fn().mockResolvedValue(reviews);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedMethod },
+      rest: { pulls: { listReviews: mockedMethod } },
     });
 
     const result = await gitLib.getApprovalStatus(pullNumber);
@@ -379,7 +379,7 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedGet = jest.fn();
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      rest: { pulls: { listReviews: mockedListReviews, get: mockedGet } },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -405,7 +405,7 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedGet = jest.fn();
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      rest: { pulls: { listReviews: mockedListReviews, get: mockedGet } },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -442,7 +442,7 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedGet = jest.fn().mockResolvedValue(prData);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      rest: { pulls: { listReviews: mockedListReviews, get: mockedGet } },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -476,7 +476,7 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedGet = jest.fn().mockResolvedValue(prData);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
+      rest: { pulls: { listReviews: mockedListReviews, get: mockedGet } },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -523,8 +523,10 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedListForRef = jest.fn().mockResolvedValue(checks);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
-      checks: { listForRef: mockedListForRef },
+      rest: {
+        pulls: { listReviews: mockedListReviews, get: mockedGet },
+        checks: { listForRef: mockedListForRef },
+      },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -572,8 +574,10 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedListForRef = jest.fn().mockResolvedValue(checks);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
-      checks: { listForRef: mockedListForRef },
+      rest: {
+        pulls: { listReviews: mockedListReviews, get: mockedGet },
+        checks: { listForRef: mockedListForRef },
+      },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -616,8 +620,10 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedListForRef = jest.fn().mockResolvedValue(checks);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
-      checks: { listForRef: mockedListForRef },
+      rest: {
+        pulls: { listReviews: mockedListReviews, get: mockedGet },
+        checks: { listForRef: mockedListForRef },
+      },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);
@@ -680,8 +686,10 @@ describe('getAutoUpdateCandidate()', () => {
     const mockedListForRef = jest.fn().mockResolvedValue(checks);
 
     github.getOctokit.mockReturnValue({
-      pulls: { listReviews: mockedListReviews, get: mockedGet },
-      checks: { listForRef: mockedListForRef },
+      rest: {
+        pulls: { listReviews: mockedListReviews, get: mockedGet },
+        checks: { listForRef: mockedListForRef },
+      },
     });
 
     const res = await gitLib.getAutoUpdateCandidate(prList);

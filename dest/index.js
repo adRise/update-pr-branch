@@ -31165,7 +31165,7 @@ const getOpenPRs = async () => {
     };
   }
 
-  const { data } = await octokit.pulls.list({
+  const { data } = await octokit.rest.pulls.list({
     ...repo,
     base: baseBranch,
     state: 'open',
@@ -31179,7 +31179,7 @@ const getOpenPRs = async () => {
 const updatePRBranch = async (pullNumber) => {
   const octokit = getOctokit();
   const repo = github.context.repo;
-  const { data } = await octokit.pulls.updateBranch({
+  const { data } = await octokit.rest.pulls.updateBranch({
     ...repo,
     pull_number: pullNumber,
   });
@@ -31193,7 +31193,7 @@ const updatePRBranch = async (pullNumber) => {
 const getPR = async (pullNumber) => {
   const octokit = getOctokit();
   const repo = github.context.repo;
-  const result = await octokit.pulls.get({
+  const result = await octokit.rest.pulls.get({
     ...repo,
     pull_number: pullNumber,
   });
@@ -31242,7 +31242,7 @@ const areAllChecksPassed = async (sha) => {
   const repo = github.context.repo;
   const {
     data: { check_runs },
-  } = await octokit.checks.listForRef({
+  } = await octokit.rest.checks.listForRef({
     ...repo,
     ref: sha,
   });
@@ -31262,7 +31262,7 @@ const getApprovalStatus = async (pullNumber) => {
   const repo = github.context.repo;
   const requiredApprovalCount = github_core.getInput('required_approval_count');
 
-  const { data: reviewsData } = await octokit.pulls.listReviews({
+  const { data: reviewsData } = await octokit.rest.pulls.listReviews({
     ...repo,
     pull_number: pullNumber,
   });
