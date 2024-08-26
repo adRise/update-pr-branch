@@ -113,10 +113,11 @@ jobs:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
           required_approval_count: 2
-          require_passed_checks: false
+          require_passed_checks: true
+          allow_ongoing_checks: true
           sort: 'created'
           direction: 'desc'
-          require_auto_merge_enabled: false
+          require_auto_merge_enabled: true
 ```
 
 Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
