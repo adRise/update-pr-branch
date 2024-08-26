@@ -17,8 +17,12 @@ inputs:
     default: '2'
   require_passed_checks:
     required: false
-    description: 'If the action should skip PRs that have failed checks, defaults to `true`'
+    description: 'If the action should skip PRs that have failed checks, defaults to `true`. Please note that if `allow_ongoing_checks` is not set to `true`, the action will skip pull requests with ongoing checks. This may result in the failure to update PR branches when the action is triggered while checks for those pull requests are still in progress.'
     default: 'true'
+  allow_ongoing_checks:
+    required: false
+    description: 'If the action should consider PRs that have ongoing checks, defaults to `false`. The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress.'
+    default: 'false'
   require_auto_merge_enabled:
     required: false
     description: 'When set to false, the action includes PRs without auto-merge; the default true excludes such PRs.'

@@ -271,6 +271,51 @@ describe('areAllChecksPassed()', () => {
     const result = await gitLib.areAllChecksPassed(sha);
     expect(result).toEqual(false);
   });
+
+  test('should return true if there is ongoing checks but no failed checks', async () => {
+    // mock pending check
+    const check = {
+      ...oldCheck,
+      status: 'queued',
+      conclusion: null,
+    };
+    mockedResponse.data.check_runs[0] = check;
+
+    const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
+
+    github.getOctokit.mockReturnValue({
+      rest: { checks: { listForRef: mockedMethod } },
+    });
+
+    const allowOngoingChecks = true;
+    const result = await gitLib.areAllChecksPassed(sha, allowOngoingChecks);
+    expect(result).toEqual(true);
+  });
+
+  test('should return false if there is ongoing checks and failed checks', async () => {
+    // mock pending check
+    const check = {
+      ...oldCheck,
+      status: 'queued',
+      conclusion: null,
+    };
+    const failedCheck = {
+      ...oldCheck,
+      conclusion: 'failure',
+    };
+    mockedResponse.data.check_runs[0] = check;
+    mockedResponse.data.check_runs[1] = failedCheck;
+
+    const mockedMethod = jest.fn().mockResolvedValue(mockedResponse);
+
+    github.getOctokit.mockReturnValue({
+      rest: { checks: { listForRef: mockedMethod } },
+    });
+
+    const allowOngoingChecks = true;
+    const result = await gitLib.areAllChecksPassed(sha, allowOngoingChecks);
+    expect(result).toEqual(false);
+  });
 });
 
 describe('getApprovalStatus()', () => {
