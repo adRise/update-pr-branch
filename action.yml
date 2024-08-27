@@ -21,7 +21,7 @@ inputs:
     default: 'true'
   allow_ongoing_checks:
     required: false
-    description: 'If the action should consider PRs that have ongoing checks, defaults to `false`. The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress.'
+    description: 'If the action should consider PRs that have ongoing checks, defaults to `false`.  The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress. Note, this option works only when `require_passed_checks` is set to `true`.'
     default: 'false'
   require_auto_merge_enabled:
     required: false

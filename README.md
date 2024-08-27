@@ -60,7 +60,7 @@ We could retrieve this value from the repo settings through an API call but that
 
 Default: true
 
-The action will skip PRs that have failed checks. Please note that if `allow_ongoing_checks` is not set to `true`, the action will skip PRs with ongoing checks. This may result in the failure to update PR branches when the action is triggered while checks for those PRs are still in progress.
+The action will skip updating PRs that have failed checks. Please note that if `allow_ongoing_checks` is set to `false`, the action will skip updating PRs with ongoing checks. This will result in the failure to update PR branches when the action is triggered while checks for those PRs are still in progress.
 
 ### `allow_ongoing_checks`
 
@@ -68,7 +68,7 @@ The action will skip PRs that have failed checks. Please note that if `allow_ong
 
 Default: false
 
-The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress.
+The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress. Note, this option works only when `require_passed_checks` is set to `true`.
 
 ### `sort`
 
