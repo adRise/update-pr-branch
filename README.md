@@ -60,7 +60,15 @@ We could retrieve this value from the repo settings through an API call but that
 
 Default: true
 
-The action will skip PRs that have failed checks.
+The action will skip updating PRs that have failed checks. Please note that if `allow_ongoing_checks` is set to `false`, the action will skip updating PRs with ongoing checks. This will result in the failure to update PR branches when the action is triggered while checks for those PRs are still in progress.
+
+### `allow_ongoing_checks`
+
+**Optional**
+
+Default: false
+
+The action will consider PRs that have ongoing checks. This is useful when the action is triggered while checks for some otherwise qualified PRs are still in progress. Note, this option works only when `require_passed_checks` is set to `true`.
 
 ### `sort`
 
@@ -76,7 +84,6 @@ Notice: this is an option provided by github rest api. In this github action, we
 
 The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when sort is `created` or sort is not specified, otherwise `asc`.
 
-
 This github action doesn't set any default parameters.
 
 ### `require_auto_merge_enabled`
@@ -86,7 +93,6 @@ This github action doesn't set any default parameters.
 Check if having auto-merge enabled in the PR is required, in order for the PR to
 be considered. It defaults to `true`, but if set to `false`, all PRs are
 considered for update (not just those with auto-merge enabled).
-
 
 ## Example usage
 
@@ -107,10 +113,11 @@ jobs:
           token: ${{ secrets.ACTION_USER_TOKEN }}
           base: 'master'
           required_approval_count: 2
-          require_passed_checks: false
+          require_passed_checks: true
+          allow_ongoing_checks: true
           sort: 'created'
           direction: 'desc'
-          require_auto_merge_enabled: false
+          require_auto_merge_enabled: true
 ```
 
 Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)

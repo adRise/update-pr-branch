@@ -1,6 +1,4 @@
 {
-  "name": "update-pr-branch",
-  "version": "0.1.2",
   "description": "Automatically update PR branch",
   "main": "dest/index.js",
   "scripts": {
