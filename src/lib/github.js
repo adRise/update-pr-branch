@@ -185,6 +185,8 @@ export const getAutoUpdateCandidate = async (openPRs) => {
   const allowOngoingChecks = isStringTrue(
     core.getInput('allow_ongoing_checks'),
   );
+  log(`requirePassedChecks ${requirePassedChecks}`);
+  log(`allowOngingChecks ${allowOngoingChecks}`);
   const applicablePRs = filterApplicablePRs(openPRs);
 
   for (const pr of applicablePRs) {
