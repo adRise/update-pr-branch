@@ -231,13 +231,13 @@ export const getAutoUpdateCandidate = async (openPRs) => {
      */
     if (requirePassedChecks) {
       const didChecksPass = await areAllChecksPassed(sha, allowOngoingChecks);
-      log('didChecksPass', didChecksPass);
-      log('allowOnGoingChecks', allowOngoingChecks);
+      log(`didChecksPass ${didChecksPass}`);
+      log(`allowOnGoingChecks ${allowOngoingChecks}`);
 
       const reasonType = allowOngoingChecks
         ? 'failed check(s)'
         : 'failed or ongoing check(s)';
-      log('reasonType', reasonType);
+      log(`reasonType ${reasonType}`);
       if (!didChecksPass) {
         printFailReason(pullNumber, `The PR has ${reasonType}`);
         continue;
