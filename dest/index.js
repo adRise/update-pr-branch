@@ -31237,7 +31237,7 @@ const getMergeableStatus = async (pullNumber) => {
 /**
  * whether all checks passed
  */
-const areAllChecksPassed = async (sha) => {
+const areAllChecksPassed = async (sha, allow_ongoing_checks) => {
   const octokit = getOctokit();
   const repo = github.context.repo;
   const {
@@ -31247,11 +31247,20 @@ const areAllChecksPassed = async (sha) => {
     ref: sha,
   });
 
-  const hasUnfinishedOrFailedChecks = check_runs.some((item) => {
-    return item.status !== 'completed' || item.conclusion === 'failure';
-  });
+  let hasOffensiveChecks = false;
+  if (allow_ongoing_checks) {
+    // check whether there are ongoing checks
+    hasOffensiveChecks = check_runs.some((item) => {
+      return item.conclusion === 'failure';
+    });
+  } else {
+    // check whether there are unfinished or failed checks
+    hasOffensiveChecks = check_runs.some((item) => {
+      return item.status !== 'completed' || item.conclusion === 'failure';
+    });
+  }
 
-  return !hasUnfinishedOrFailedChecks;
+  return !hasOffensiveChecks;
 };
 
 /**
@@ -31291,7 +31300,9 @@ const getApprovalStatus = async (pullNumber) => {
 };
 
 const filterApplicablePRs = (openPRs) => {
-  const includeNonAutoMergePRs = isStringFalse(github_core.getInput('require_auto_merge_enabled'));
+  const includeNonAutoMergePRs = isStringFalse(
+    github_core.getInput('require_auto_merge_enabled'),
+  );
   if (includeNonAutoMergePRs) {
     return openPRs;
   }
@@ -31307,6 +31318,9 @@ const getAutoUpdateCandidate = async (openPRs) => {
 
   const requirePassedChecks = isStringTrue(
     github_core.getInput('require_passed_checks'),
+  );
+  const allowOngoingChecks = isStringTrue(
+    github_core.getInput('allow_ongoing_checks'),
   );
   const applicablePRs = filterApplicablePRs(openPRs);
 
@@ -31353,9 +31367,13 @@ const getAutoUpdateCandidate = async (openPRs) => {
      * need to note: the mergeable, and mergeable_state don't reflect the checks status
      */
     if (requirePassedChecks) {
-      const didChecksPass = await areAllChecksPassed(sha);
+      const didChecksPass = await areAllChecksPassed(sha, allowOngoingChecks);
+
+      const reasonType = allowOngoingChecks
+        ? 'failed check(s)'
+        : 'failed or ongoing check(s)';
       if (!didChecksPass) {
-        printFailReason(pullNumber, 'The PR has failed or ongoing check(s)');
+        printFailReason(pullNumber, `The PR has ${reasonType}`);
         continue;
       }
     }
