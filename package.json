@@ -5,7 +5,8 @@
     "lint": "eslint -c eslint.config.js src",
     "test": "jest src --coverage --verbose",
     "jest-dev": "jest src --coverage --verbose --watch",
-    "build": "ncc build src/index.js -o dest"
+    "build": "ncc build src/index.js -o dest",
+    "prepare": "husky"
   },
   "repository": "git@github.com:adRise/update-pr-branch.git",
   "license": "MIT",
@@ -22,6 +23,7 @@
     "eslint": "^9.2.0",
     "eslint-plugin-jest": "^28.5.0",
     "globals": "^15.3.0",
+    "husky": "^9.1.5",
     "jest": "^29.7.0"
   }
 }
