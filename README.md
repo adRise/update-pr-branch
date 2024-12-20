@@ -107,10 +107,17 @@ jobs:
   autoupdate:
     runs-on: ubuntu-latest
     steps:
+      - name: Create token from Github App
+        id: create_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.REPO_PR_APP_ID }}
+          private-key: ${{ secrets.REPO_PR_RW }}
+
       - name: Automatically update PR
         uses: adRise/update-pr-branch@VERSION_YOU_WANT_TO_USE
         with:
-          token: ${{ secrets.ACTION_USER_TOKEN }}
+          token: ${{ steps.create_token.outputs.token }}
           base: 'master'
           required_approval_count: 2
           require_passed_checks: true
