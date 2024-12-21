@@ -34,6 +34,8 @@ The [personal access token](https://github.com/settings/tokens/).
 
 Need to note, you can't use `GITHUB_TOKEN` because of [this limitation](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token)
 
+Alternatively, you can use a **GitHub App token** for better security and flexibility. See the "GitHub App Token Setup" section below.
+
 ### `base`
 
 **Required**
@@ -90,11 +92,11 @@ This github action doesn't set any default parameters.
 
 **Optional**
 
-Check if having auto-merge enabled in the PR is required, in order for the PR to
-be considered. It defaults to `true`, but if set to `false`, all PRs are
-considered for update (not just those with auto-merge enabled).
+Check if having auto-merge enabled in the PR is required, in order for the PR to be considered. It defaults to `true`, but if set to `false`, all PRs are considered for update (not just those with auto-merge enabled).
 
 ## Example usage
+
+### Using Personal Access Token
 
 ```yml
 name: PR update
@@ -107,12 +109,61 @@ jobs:
   autoupdate:
     runs-on: ubuntu-latest
     steps:
-      - name: Create token from Github App
+      - name: Automatically update PR
+        uses: adRise/update-pr-branch@VERSION_YOU_WANT_TO_USE
+        with:
+          token: ${{ secrets.ACTION_USER_TOKEN }}
+          base: 'master'
+          required_approval_count: 2
+          require_passed_checks: true
+          allow_ongoing_checks: true
+          sort: 'created'
+          direction: 'desc'
+          require_auto_merge_enabled: true
+```
+
+Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
+
+### Using GitHub App Token
+
+To improve security and flexibility, you can use a GitHub App token instead of a personal access token.
+
+#### Steps to Set Up the GitHub App
+
+1. **Create a GitHub App**:
+   - Go to your GitHub Organization settings and create a new GitHub App.
+2. **Generate a Private Key**:
+   - Once the app is created, generate a private key for authentication.
+3. **Assign Permissions**:
+   - Grant the following permissions:
+     - **Metadata**: Read access
+     - **Content**: Read and write access
+     - **Pull Requests**: Read and write access
+4. **Install the App**:
+   - Install the app on all repositories or specific repositories where this action will run.
+5. **Save Variables and Secrets**:
+   - Save the App ID as a repository or organization variable.
+   - Save the private key as a repository or organization secret.
+
+#### Example Usage with GitHub App Token
+
+```yml
+name: PR update
+
+on:
+  push:
+    branches:
+      - 'master'
+jobs:
+  autoupdate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create App token
         id: create_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.REPO_PR_APP_ID }}
-          private-key: ${{ secrets.REPO_PR_RW }}
+          app-id: ${{ vars.GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
 
       - name: Automatically update PR
         uses: adRise/update-pr-branch@VERSION_YOU_WANT_TO_USE
@@ -127,7 +178,7 @@ jobs:
           require_auto_merge_enabled: true
 ```
 
-Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
+---
 
 ## Development
 
@@ -138,3 +189,4 @@ yarn build
 ```
 
 Note: You need to run `yarn build` before commit the changes because when the action only use the compiled `dest/index.js`.
+
