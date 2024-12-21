@@ -145,6 +145,8 @@ To improve security and flexibility, you can use a GitHub App token instead of a
    - Save the App ID as a repository or organization variable.
    - Save the private key as a repository or organization secret.
 
+__If you have branch protection rules, ensure the GitHub App has an exemption to bypass those rules.__
+
 #### Example Usage with GitHub App Token
 
 ```yml
