@@ -88,6 +88,14 @@ The direction of the sort. Can be either `asc` or `desc`. Default: `desc` when s
 
 This github action doesn't set any default parameters.
 
+### `included_labels`
+
+**Optional**
+
+Comma-separated list of labels that PRs must have to be considered for update. If not provided or empty, all PRs will be considered regardless of their labels. Labels are case-sensitive and whitespace is trimmed.
+
+Example: `"label-a, label-b"` will only consider PRs that have either `label-a` or `label-b`.
+
 ### `require_auto_merge_enabled`
 
 **Optional**
@@ -145,7 +153,7 @@ To improve security and flexibility, you can use a GitHub App token instead of a
    - Save the App ID as a repository or organization variable.
    - Save the private key as a repository or organization secret.
 
-__If you have branch protection rules, ensure the GitHub App has an exemption to bypass those rules.__
+**If you have branch protection rules, ensure the GitHub App has an exemption to bypass those rules.**
 
 #### Example Usage with GitHub App Token
 
@@ -191,4 +199,3 @@ yarn build
 ```
 
 Note: You need to run `yarn build` before commit the changes because when the action only use the compiled `dest/index.js`.
-
