@@ -169,8 +169,7 @@ export const getApprovalStatus = async (pullNumber) => {
  */
 export const filterPRsByLabels = (prs) => {
   const includedLabels = core.getInput('included_labels') || '';
-  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim());
-  
+  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim()).filter(label => label !== '');
   if (includedLabelsArray.length === 0 || !includedLabels) {
     return prs;
   }
