@@ -92,7 +92,7 @@ This github action doesn't set any default parameters.
 
 **Optional**
 
-Comma-separated list of labels that PRs must have to be considered for update. If not provided or empty, all PRs will be considered regardless of their labels. Labels are case-sensitive and whitespace is trimmed.
+Comma-separated list of labels. PRs must have at least one of these labels to be considered for update. If not provided or empty, all PRs will be considered regardless of their labels. Labels are case-sensitive and whitespace is trimmed.
 
 Example: `"label-a, label-b"` will only consider PRs that have either `label-a` or `label-b`.
 

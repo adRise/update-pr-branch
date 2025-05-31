@@ -169,15 +169,20 @@ export const getApprovalStatus = async (pullNumber) => {
  */
 export const filterPRsByLabels = (prs) => {
   const includedLabels = core.getInput('included_labels') || '';
-  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim()).filter(label => label !== '');
-  if (includedLabelsArray.length === 0 || !includedLabels) {
+  const includedLabelsArray = includedLabels
+    .split(',')
+    .map((label) => label.trim())
+    .filter((label) => label !== '');
+  if (includedLabelsArray.length === 0) {
     return prs;
   }
-  
+
   const filteredPRs = prs.filter((item) => {
-    return item.labels.some((label) => includedLabelsArray.includes(label.name));
+    return item.labels.some((label) =>
+      includedLabelsArray.includes(label.name),
+    );
   });
-  
+
   log(`Count of PRs with included labels: ${filteredPRs.length}`);
   return filteredPRs;
 };
@@ -191,11 +196,11 @@ export const filterPRsByAutoMerge = (prs) => {
   const includeNonAutoMergePRs = isStringFalse(
     core.getInput('require_auto_merge_enabled'),
   );
-  
+
   if (includeNonAutoMergePRs) {
     return prs;
   }
-  
+
   const autoMergeEnabledPRs = prs.filter((item) => item.auto_merge);
   log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
   return autoMergeEnabledPRs;
@@ -204,7 +209,7 @@ export const filterPRsByAutoMerge = (prs) => {
 export const filterApplicablePRs = (openPRs) => {
   // First filter by labels
   const labelFilteredPRs = filterPRsByLabels(openPRs);
-  
+
   // Then filter by auto-merge status
   return filterPRsByAutoMerge(labelFilteredPRs);
 };
