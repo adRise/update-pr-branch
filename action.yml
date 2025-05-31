@@ -33,6 +33,9 @@ inputs:
   token:
     description: 'The GitHub personal access token'
     required: true
+  included_labels:
+    required: false
+    description: 'A comma-separated list of labels that the action will consider. If a PR has any of the labels, the action will consider it.'
 
 runs:
   using: 'node20'
