@@ -31306,8 +31306,7 @@ const getApprovalStatus = async (pullNumber) => {
  */
 const filterPRsByLabels = (prs) => {
   const includedLabels = github_core.getInput('included_labels') || '';
-  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim());
-  
+  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim()).filter(label => label !== '');
   if (includedLabelsArray.length === 0 || !includedLabels) {
     return prs;
   }

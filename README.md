@@ -132,6 +132,31 @@ jobs:
 
 Replace the `VERSION_YOU_WANT_TO_USE` with the actual version you want to use, check the version format [here](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses)
 
+## Versioning
+
+This action follows [semantic versioning](https://semver.org/) and provides rolling tags for convenient version management:
+
+### Recommended Usage
+
+```yml
+# Get automatic patch updates (recommended for most users)
+uses: adRise/update-pr-branch@v0.10
+
+# Get automatic minor and patch updates (for early adopters)
+uses: adRise/update-pr-branch@v0
+
+# Pin to exact version (for maximum stability)
+uses: adRise/update-pr-branch@v0.10.1
+```
+
+### Available Tag Patterns
+
+- **`@v0.10.1`** - Exact version (no automatic updates)
+- **`@v0.10`** - Latest patch in the 0.10.x series (gets 0.10.2, 0.10.3, etc. automatically)
+- **`@v0`** - Latest minor and patch in the 0.x.y series (gets 0.11.0, 0.12.0, etc. automatically)
+
+This follows the same pattern as official GitHub Actions like `actions/checkout@v4`. Rolling tags are automatically updated when new releases are published.
+
 ### Using GitHub App Token
 
 To improve security and flexibility, you can use a GitHub App token instead of a personal access token.
