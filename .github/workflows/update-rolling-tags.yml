@@ -1,0 +1,76 @@
+name: Update Rolling Tags
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-rolling-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update Rolling Tags
+        run: |
+          # Get the tag that triggered this workflow
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          echo "Processing tag: $TAG_NAME"
+
+          # Validate that this is a semantic version tag (vX.Y.Z)
+          if [[ ! $TAG_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag $TAG_NAME is not a semantic version tag (vX.Y.Z), skipping rolling tag updates"
+            exit 0
+          fi
+
+          # Get the commit hash that the release tag points to
+          TAG_COMMIT=$(git rev-list -n 1 "$TAG_NAME")
+          echo "Release tag $TAG_NAME points to commit: $TAG_COMMIT"
+
+          # Extract version components
+          VERSION=${TAG_NAME#v}  # Remove 'v' prefix
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          echo "Version components: MAJOR=$MAJOR, MINOR=$MINOR, PATCH=$PATCH"
+
+          # Create/update major version tag (e.g., v0) pointing to the same commit
+          MAJOR_TAG="v$MAJOR"
+          echo "Updating major tag: $MAJOR_TAG -> $TAG_COMMIT"
+          git tag -fa "$MAJOR_TAG" "$TAG_COMMIT" -m "Rolling tag for major version $MAJOR (currently $TAG_NAME)"
+
+          # Create/update minor version tag (e.g., v0.7) pointing to the same commit
+          MINOR_TAG="v$MAJOR.$MINOR"
+          echo "Updating minor tag: $MINOR_TAG -> $TAG_COMMIT"
+          git tag -fa "$MINOR_TAG" "$TAG_COMMIT" -m "Rolling tag for minor version $MAJOR.$MINOR (currently $TAG_NAME)"
+
+          # Push the updated tags
+          git push origin "$MAJOR_TAG" --force
+          git push origin "$MINOR_TAG" --force
+
+          echo "Successfully updated rolling tags:"
+          echo "  $MAJOR_TAG -> $TAG_NAME (commit: $TAG_COMMIT)"
+          echo "  $MINOR_TAG -> $TAG_NAME (commit: $TAG_COMMIT)"
+
+      - name: Summary
+        run: |
+          echo "## Rolling Tags Updated 🏷️" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following rolling tags have been updated for release \`${{ github.event.release.tag_name }}\`:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          VERSION=${TAG_NAME#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          echo "- \`v$MAJOR\` → \`$TAG_NAME\` (major version rolling tag)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`v$MAJOR.$MINOR\` → \`$TAG_NAME\` (minor version rolling tag)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Users can now reference this action using:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`adRise/update-pr-branch@$TAG_NAME\` (exact version)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`adRise/update-pr-branch@v$MAJOR.$MINOR\` (auto-patch updates)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`adRise/update-pr-branch@v$MAJOR\` (auto-minor and patch updates)" >> $GITHUB_STEP_SUMMARY
