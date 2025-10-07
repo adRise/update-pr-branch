@@ -82,16 +82,19 @@ export const getMergeableStatus = async (pullNumber) => {
     mergeable_state: data.mergeable_state,
   };
 
+  let attempt = 0;
+
   // for unknown, the first `get` request above will trigger a background job to create a test merge commit
-  if (mergeableStatus.mergeable_state === 'unknown') {
+  while (attempt < 5 && mergeableStatus.mergeable_state === 'unknown') {
     // https://docs.github.com/en/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests
     // Github recommends to use poll to get a non null/unknown value, we use a compromised version here because of the api rate limit
-    await wait(3000);
+    await wait(3000 * Math.pow(2, attempt));
     data = await getPR(pullNumber);
     mergeableStatus = {
       mergeable: data.mergeable,
       mergeable_state: data.mergeable_state,
     };
+    attempt++;
   }
 
   return mergeableStatus;

@@ -214,6 +214,30 @@ describe('getMergeableStatus()', () => {
 
     utils.wait.mockRestore();
   });
+
+  test('will wait and retry 5 times with backoff if the mergeable_state is unknown', async () => {
+    const mergeableStatus = { mergeable: null, mergeable_state: 'unknown' };
+    const mockedResponse = { data: { ...prMetaData.data, ...mergeableStatus } };
+    const mockedMethod = jest
+      .fn()
+      .mockResolvedValue(mockedResponse);
+
+    github.getOctokit.mockReturnValue({
+      rest: { pulls: { get: mockedMethod } },
+    });
+    jest.spyOn(utils, 'wait').mockImplementation();
+
+    const res = await gitLib.getMergeableStatus();
+    expect(res).toEqual(mergeableStatus);
+    const expectedNumRetries = 5;
+    expect(mockedMethod).toHaveBeenCalledTimes(1 + expectedNumRetries);
+    expect(utils.wait).toHaveBeenCalledTimes(expectedNumRetries);
+    for (let i = 0; i < expectedNumRetries; i++) {
+      expect(utils.wait).toHaveBeenCalledWith(3000 * Math.pow(2, i));
+    }
+
+    utils.wait.mockRestore();
+  });
 });
 
 describe('areAllChecksPassed()', () => {
