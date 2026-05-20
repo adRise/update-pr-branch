@@ -1,0 +1,27 @@
+dest/index.js
+  18f3d52459566077 2374,2479,2481,2667,5453-5548,5584,5600,5643,11647,11723,11729-11730,12158,12163-12165,12426-12444,12449-12450,14464
+action.yml
+  18f3d52459566077 41
+src/lib/util.test.js
+  18f3d52459566077 62-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "horus_version": "1.2.7",
+  "base_commit_sha": "53062c5e118f72f6e0ec9219a55be10b49e29578",
+  "prompts": {
+    "18f3d52459566077": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bc50d4c-97b8-417d-821d-b779f1db691b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Zhiye Li",
+      "messages": [],
+      "total_additions": 161,
+      "total_deletions": 154,
+      "accepted_lines": 161,
+      "overriden_lines": 0
+    }
+  }
+}
