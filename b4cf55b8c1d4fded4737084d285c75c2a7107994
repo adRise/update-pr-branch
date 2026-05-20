@@ -1,0 +1,25 @@
+src/lib/util.test.js
+  18f3d52459566077 62-84
+action.yml
+  18f3d52459566077 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "horus_version": "1.2.7",
+  "base_commit_sha": "b4cf55b8c1d4fded4737084d285c75c2a7107994",
+  "prompts": {
+    "18f3d52459566077": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bc50d4c-97b8-417d-821d-b779f1db691b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Zhiye Li",
+      "messages": [],
+      "total_additions": 24,
+      "total_deletions": 1,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
