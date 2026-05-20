@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "horus_version": "1.2.7",
+  "base_commit_sha": "1bc9fc708a8831bdf3e7404559d5743a4261374d",
+  "prompts": {
+    "18f3d52459566077": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bc50d4c-97b8-417d-821d-b779f1db691b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Zhiye Li",
+      "messages": [],
+      "total_additions": 290,
+      "total_deletions": 290,
+      "accepted_lines": 137,
+      "overriden_lines": 0
+    }
+  }
+}
