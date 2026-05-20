@@ -59,3 +59,26 @@ describe('isStringTrue()', () => {
     expect(isStringTrue()).toBe(false);
   });
 });
+
+describe('isStringFalse()', () => {
+  const isStringFalse = utils.isStringFalse;
+  test('should return the correct value based on the string', () => {
+    expect(isStringFalse('false')).toBe(true);
+    expect(isStringFalse('False')).toBe(true);
+    expect(isStringFalse('FALSE')).toBe(true);
+    expect(isStringFalse('fAlse')).toBe(true);
+    expect(isStringFalse('true')).toBe(false);
+    expect(isStringFalse('True')).toBe(false);
+    expect(isStringFalse('TRUE')).toBe(false);
+  });
+
+  test('should return false if the string is not a boolean', () => {
+    expect(isStringFalse('something')).toBe(false);
+    expect(isStringFalse()).toBe(false);
+  });
+
+  test('should coerce non-string inputs', () => {
+    expect(isStringFalse(false)).toBe(true);
+    expect(isStringFalse(true)).toBe(false);
+  });
+});

@@ -38,5 +38,5 @@ inputs:
     description: 'A comma-separated list of labels that the action will consider. If a PR has any of the labels, the action will consider it.'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dest/index.js'
