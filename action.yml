@@ -36,6 +36,9 @@ inputs:
   included_labels:
     required: false
     description: 'A comma-separated list of labels that the action will consider. If a PR has any of the labels, the action will consider it.'
+  excluded_labels:
+    required: false
+    description: 'A comma-separated list of labels that the action will ignore. If a PR has any of the labels, it will be skipped.'
 
 runs:
   using: 'node24'

@@ -96,6 +96,14 @@ Comma-separated list of labels that PRs must have to be considered for update. I
 
 Example: `"label-a, label-b"` will only consider PRs that have either `label-a` or `label-b`.
 
+### `excluded_labels`
+
+**Optional**
+
+Comma-separated list of labels that PRs must not have to be considered for update. If not provided or empty, no PRs are excluded by label. Labels are case-sensitive and whitespace is trimmed.
+
+Example: `"do-not-update, blocked"` will skip PRs that have either `do-not-update` or `blocked`.
+
 ### `require_auto_merge_enabled`
 
 **Optional**

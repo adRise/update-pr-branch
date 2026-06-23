@@ -166,22 +166,51 @@ export const getApprovalStatus = async (pullNumber) => {
 };
 
 /**
- * Filter PRs based on their labels
+ * Filter PRs based on their included labels
  * @param {Array} prs - List of PRs
- * @returns {Array} - Filtered PRs based on labels
+ * @returns {Array} - Filtered PRs based on included labels
  */
-export const filterPRsByLabels = (prs) => {
-  const includedLabels = core.getInput('included_labels') || '';
-  const includedLabelsArray = includedLabels.split(',').map((label) => label.trim()).filter(label => label !== '');
-  if (includedLabelsArray.length === 0 || !includedLabels) {
+const parseLabelInput = (value) => {
+  return (value || '')
+    .split(',')
+    .map((label) => label.trim().toLowerCase())
+    .filter((label) => label !== '');
+};
+
+export const filterPRsByIncludedLabels = (prs) => {
+  const includedLabelsArray = parseLabelInput(core.getInput('included_labels'));
+  if (includedLabelsArray.length === 0) {
     return prs;
   }
-  
+
   const filteredPRs = prs.filter((item) => {
-    return item.labels.some((label) => includedLabelsArray.includes(label.name));
+    return (item.labels || []).some((label) =>
+      includedLabelsArray.includes(label.name.toLowerCase()),
+    );
   });
-  
+
   log(`Count of PRs with included labels: ${filteredPRs.length}`);
+  return filteredPRs;
+};
+
+/**
+ * Filter PRs based on excluded labels
+ * @param {Array} prs - List of PRs
+ * @returns {Array} - Filtered PRs excluding configured labels
+ */
+export const filterPRsByExcludedLabels = (prs) => {
+  const excludedLabelsArray = parseLabelInput(core.getInput('excluded_labels'));
+  if (excludedLabelsArray.length === 0) {
+    return prs;
+  }
+
+  const filteredPRs = prs.filter((item) => {
+    return !(item.labels || []).some((label) =>
+      excludedLabelsArray.includes(label.name.toLowerCase()),
+    );
+  });
+
+  log(`Count of PRs without excluded labels: ${filteredPRs.length}`);
   return filteredPRs;
 };
 
@@ -194,22 +223,27 @@ export const filterPRsByAutoMerge = (prs) => {
   const includeNonAutoMergePRs = isStringFalse(
     core.getInput('require_auto_merge_enabled'),
   );
-  
+
   if (includeNonAutoMergePRs) {
     return prs;
   }
-  
+
   const autoMergeEnabledPRs = prs.filter((item) => item.auto_merge);
   log(`Count of auto-merge enabled PRs: ${autoMergeEnabledPRs.length}`);
   return autoMergeEnabledPRs;
 };
 
 export const filterApplicablePRs = (openPRs) => {
-  // First filter by labels
-  const labelFilteredPRs = filterPRsByLabels(openPRs);
-  
+  // First filter by included labels
+  const includedLabelFilteredPRs = filterPRsByIncludedLabels(openPRs);
+
+  // Then filter out excluded labels
+  const excludedLabelFilteredPRs = filterPRsByExcludedLabels(
+    includedLabelFilteredPRs,
+  );
+
   // Then filter by auto-merge status
-  return filterPRsByAutoMerge(labelFilteredPRs);
+  return filterPRsByAutoMerge(excludedLabelFilteredPRs);
 };
 
 /**
